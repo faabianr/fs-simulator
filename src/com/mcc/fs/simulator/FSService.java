@@ -1,23 +1,32 @@
 package com.mcc.fs.simulator;
 
+import com.mcc.fs.simulator.model.Directory;
 import com.mcc.fs.simulator.model.FileAccessMode;
+import com.mcc.fs.simulator.model.Inode;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
+import java.util.Date;
 
 public class FSService {
 
     private static final String DISK_FILE_PATH = "./diskfile";
     private byte[] boot;
-    private byte[] LBL;
-    private byte[] LIL;
+    private byte[] LBL; // 256 bloques en 1k
+    private byte[] LIL; // 16 numeros de inodos libres
+    private byte[] InodeTable; // son 4 bloques de 1024.
+    private Directory rootDirectory;
+    private int lil = 0;
+    private int lbl = 0;
 
     public FSService() {
         initBoot();
         initLBL();
         initLIL();
+        initInodeTable();
+        initRootDirectory();
     }
 
     private void initBoot() {
@@ -30,18 +39,36 @@ public class FSService {
         System.out.println("Initializing LBL ...");
         LBL = new byte[1024];
         Arrays.fill(LBL, (byte) 0);
-        LBL[0] = 11;
+        LBL[0] = 9;
         LBL[1] = 10;
-        LBL[2] = 9;
+        LBL[2] = 11;
     }
 
     private void initLIL() {
         System.out.println("Initializing LIL ...");
         LIL = new byte[1024];
         Arrays.fill(LIL, (byte) 0);
-        LIL[0] = 3;
+        byte startInode = 3;
+        for (byte i = 0; i <= 16; i++) {
+            LIL[i] = startInode;
+            startInode++;
+        }
+       /* LIL[0] = 3;
         LIL[1] = 4;
-        LIL[2] = 5;
+        LIL[2] = 5;*/
+    }
+
+    private void initInodeTable() {
+        System.out.println("Initializing Inode Table ...");
+        InodeTable = new byte[1024*4];
+        System.out.println("Inode table size:" +  InodeTable.length);
+        Arrays.fill(InodeTable, (byte) 0);
+    }
+
+    private void initRootDirectory(){
+        System.out.println("Initializing root directory ...");
+        Inode rootDirectoryInode = new Inode(1024, "D","0",new Date(),"rwxrwx",new int[]{8});
+        rootDirectory = new Directory(2,"root");
     }
 
     public void writeDiskFile() {
@@ -57,13 +84,6 @@ public class FSService {
             diskFile.seek(offset);
             System.out.println("Setting file seek to=" + offset);
 
-            // writing LBL
-            System.out.println("Writing LBL into disk file with fd=" + diskFile.getFD().toString());
-            diskFile.write(LBL);
-            offset += LBL.length;
-            diskFile.seek(offset);
-            System.out.println("Setting file seek to=" + offset);
-
             // writing LIL
             System.out.println("Writing LIL into disk file with fd=" + diskFile.getFD().toString());
             diskFile.write(LIL);
@@ -71,8 +91,39 @@ public class FSService {
             diskFile.seek(offset);
             System.out.println("Setting file seek to=" + offset);
 
+            // writing LBL
+            System.out.println("Writing LBL into disk file with fd=" + diskFile.getFD().toString());
+            diskFile.write(LBL);
+            offset += LBL.length;
+            diskFile.seek(offset);
+            System.out.println("Setting file seek to=" + offset);
+
+            // writing Inode Table
+            System.out.println("Writing Inode Table into disk file with fd=" + diskFile.getFD().toString());
+            diskFile.write(InodeTable);
+            offset += InodeTable.length;
+            diskFile.seek(offset);
+            System.out.println("Setting file seek to=" + offset);
+
+            // writing root directory
+            System.out.println("Writing inode root directory into disk file with fd=" + diskFile.getFD().toString());
+            offset = (LBL.length*3) +1; // es +1 porque el primer inodo no se usa
+            System.out.println("offset=" + offset);
+            diskFile.seek(offset);
+            diskFile.write(rootDirectory.getInode());
+            System.out.println("Setting file seek to=" + offset);
+
+            System.out.println("Writing content root directory into disk file with fd=" + diskFile.getFD().toString());
+            offset += InodeTable.length -2; // Le quitamos el 1 que contamos en el offset del inode root
+            System.out.println("offset=" + offset);
+            diskFile.seek(offset);
+            diskFile.writeChar('.');
+            diskFile.writeChars("..");
+            System.out.println("Setting file seek to=" + offset);
+
             System.out.println("Closing disk file with fd=" + diskFile.getFD().toString());
             diskFile.close();
+
         } catch (FileNotFoundException e) {
             System.err.println("Unable to create disk file. Cause: " + e.getMessage());
             System.exit(1);
@@ -85,18 +136,23 @@ public class FSService {
 
     public void readDiskFile() {
         try {
-            byte[] content = new byte[1024 * 3];
-
             System.out.println("Opening disk file in " + FileAccessMode.READ.toString() + " mode.");
             RandomAccessFile diskFile = new RandomAccessFile(DISK_FILE_PATH, FileAccessMode.READ.toString());
+            byte[] content = new byte[(int) diskFile.length()];
             System.out.println("Reading disk file");
-            diskFile.read(content, 0, content.length);
+            diskFile.read(content);
+            int counter = 0;
 
             for (byte b : content) {
+                if (counter == 1024){
+                    System.out.print("\n");
+                    counter = 0;
+                }
                 System.out.print(b);
+                counter++;
             }
 
-            System.out.println("Closing disk file with fd=" + diskFile.getFD().toString());
+            System.out.println("\nClosing disk file with fd=" + diskFile.getFD().toString());
             diskFile.close();
         } catch (FileNotFoundException e) {
             System.err.println("Unable to read disk file. Not found.");

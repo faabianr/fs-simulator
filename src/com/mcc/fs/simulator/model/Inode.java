@@ -4,7 +4,8 @@ import java.util.Date;
 
 public class Inode {
     private int size;
-    private String type;
+    private String type; // Tipos: D Directory, - (archivo normal), C - Caracter, P - Pipe, L - link, B - bloque
+    // podriamos ponerlo como char.
     private String owner;
     private Date creationDate;
     private String permissions;
