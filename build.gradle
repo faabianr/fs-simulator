@@ -21,6 +21,8 @@ sourceSets {
 }
 dependencies {
     compile 'org.springframework.boot:spring-boot-starter-web'
+    compile 'io.springfox:springfox-swagger2:2.9.2'
+    compile 'io.springfox:springfox-swagger-ui:2.9.2'
     compileOnly 'org.projectlombok:lombok:1.18.16'
     annotationProcessor 'org.projectlombok:lombok:1.18.16'
 
