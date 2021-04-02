@@ -111,7 +111,7 @@ public class FSService {
 
             // writing root directory
             System.out.println("Writing inode root directory into disk file with fd=" + diskFile.getFD().toString());
-            offset = (LBL.length * 3) + 1; // es +1 porque el primer inodo no se usa
+            offset = (LBL.length * 3L) + 1; // es +1 porque el primer inodo no se usa
             System.out.println("offset=" + offset);
             diskFile.seek(offset);
             diskFile.write(rootDirectory.getInode());
