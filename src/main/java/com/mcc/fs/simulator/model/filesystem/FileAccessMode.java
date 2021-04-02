@@ -1,4 +1,4 @@
-package com.mcc.fs.simulator.model;
+package com.mcc.fs.simulator.model.filesystem;
 
 public enum FileAccessMode {
 
