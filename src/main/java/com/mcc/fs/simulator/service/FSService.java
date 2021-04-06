@@ -20,8 +20,6 @@ public class FSService {
     private byte[] LIL; // 16 numeros de inodos libres
     private byte[] InodeTable; // son 4 bloques de 1024.
     private Directory rootDirectory;
-    private final int lil = 0;
-    private final int lbl = 0;
 
     public FSService() {
         initBoot();
@@ -55,9 +53,9 @@ public class FSService {
             LIL[i] = startInode;
             startInode++;
         }
-       /* LIL[0] = 3;
+        LIL[0] = 3;
         LIL[1] = 4;
-        LIL[2] = 5;*/
+        LIL[2] = 5;
     }
 
     private void initInodeTable() {
