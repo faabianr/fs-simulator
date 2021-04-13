@@ -43,19 +43,19 @@ $( document ).ready( function() {
 
       function executeCommand(command){
           var executionRequest = {
-               "input": command,
-          },
-           success = command;
-          /* $.ajax({
-                url: "filesystem/commands",
-                dataType: "json",
-                data: executionRequest,
+               "input": command
+          };
+          
+          $.ajax({
+                url: 'filesystem/commands',
+                dataType: 'json',
+                data: JSON.stringify(executionRequest),
                 type : 'POST',
                 contentType: 'application/json',
                 Accept: 'application/json',
                 cache : false,
-                success: function(resultData) { alert("Command read") }
-          });*/
+                success: function(resultData) { alert('Command read') }
+          });
           return success;
       }
   init();
