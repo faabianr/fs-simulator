@@ -1,16 +1,13 @@
 package com.mcc.fs.simulator.service;
 
-import com.mcc.fs.simulator.model.filesystem.Directory;
-import com.mcc.fs.simulator.model.filesystem.FileAccessMode;
-import com.mcc.fs.simulator.model.filesystem.FileType;
-import com.mcc.fs.simulator.model.filesystem.Inode;
+import com.mcc.fs.simulator.config.Defaults;
+import com.mcc.fs.simulator.model.filesystem.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
-import java.util.Arrays;
 import java.util.Date;
 
 @Slf4j
@@ -18,66 +15,24 @@ import java.util.Date;
 public class FSService {
 
     private static final String DISK_FILE_PATH = "./diskfile";
-
-    public static final String DEFAULT_OWNER = "root";
-    public static final String DEFAULT_PERMISSIONS = "rwxrwxrwx";
-
-    private byte[] boot;
-    private byte[] LBL; // 256 bloques en 1k
-    private byte[] LIL; // 16 numeros de inodos libres
-    private Inode[] inodeList; // son 4 bloques de 1K, 16 inodes por bloque = 64 inodes en total
+    private final BootBlock bootBlock = new BootBlock();
+    private final SuperBlock superBlock = new SuperBlock(); // this one contains the LBL and LIL
+    private final InodeList inodeList = new InodeList();
     private Directory rootDirectory;
 
     public FSService() {
-        initBoot();
-        initLBL();
-        initLIL();
-        initInodeList();
+        bootBlock.init();
+        superBlock.init();
+        inodeList.init();
         initRootDirectory();
     }
 
-    private void initBoot() {
-        log.info("Initializing boot ...");
-        boot = new byte[1024];
-        Arrays.fill(boot, (byte) 0);
-    }
 
-    private void initLBL() {
-        log.info("Initializing LBL ...");
-        LBL = new byte[1024];
-        Arrays.fill(LBL, (byte) 0);
-        LBL[0] = 9;
-        LBL[1] = 10;
-        LBL[2] = 11;
-    }
-
-    private void initLIL() {
-        log.info("Initializing LIL ...");
-        LIL = new byte[1024];
-        Arrays.fill(LIL, (byte) 0);
-        byte startInode = 3;
-        for (byte i = 0; i <= 16; i++) {
-            LIL[i] = startInode;
-            startInode++;
-        }
-        LIL[0] = 3;
-        LIL[1] = 4;
-        LIL[2] = 5;
-    }
-
-    private void initInodeList() {
-        log.info("Initializing Inodes list ...");
-        inodeList = new Inode[64];
-        log.info("Inode list size: {}", inodeList.length);
-        for (int i = 0; i < inodeList.length; i++) {
-            inodeList[i] = Inode.builder().size(0).type(FileType.REGULAR_FILE).owner(DEFAULT_OWNER).creationDate(new Date()).permissions(DEFAULT_PERMISSIONS).tableOfContents(new int[11]).build();
-        }
-    }
 
     private void initRootDirectory() {
         log.info("Initializing root directory ...");
         Inode rootDirectoryInode = Inode.builder()
-                .size(1024).type(FileType.DIRECTORY).owner(DEFAULT_OWNER).creationDate(new Date()).permissions(DEFAULT_PERMISSIONS).tableOfContents(new int[11]).build();
+                .size(1024).type(FileType.DIRECTORY).owner(Defaults.OWNER).creationDate(new Date()).permissions(Defaults.PERMISSIONS).tableOfContents(new int[11]).build();
 
         rootDirectory = new Directory(2, "root");
     }
@@ -92,22 +47,22 @@ public class FSService {
 
             // writing boot
             log.info("Writing boot into disk file with fd={}", diskFile.getFD().toString());
-            diskFile.write(boot);
-            offset += boot.length;
+            diskFile.write(bootBlock.getContent());
+            offset += BootBlock.SIZE;
             diskFile.seek(offset);
             log.info("Setting file seek to={}", offset);
 
             // writing LIL
             log.info("Writing LIL into disk file with fd={}", diskFile.getFD().toString());
-            diskFile.write(LIL);
-            offset += LIL.length;
+            diskFile.write(superBlock.getLIL());
+            offset += superBlock.getLIL().length;
             diskFile.seek(offset);
             log.info("Setting file seek to={}", offset);
 
             // writing LBL
             log.info("Writing LBL into disk file with fd={}", diskFile.getFD().toString());
-            diskFile.write(LBL);
-            offset += LBL.length;
+            diskFile.write(superBlock.getLBL());
+            offset += superBlock.getLBL().length;
             diskFile.seek(offset);
             log.info("Setting file seek to={}", offset);
 
