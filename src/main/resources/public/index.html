@@ -4,13 +4,95 @@
     <meta charset="utf-8">
     <meta name="viewport" content="width=device-width, initial-scale=1">
 
-    <link href="css/style.css" rel="stylesheet">
-    <script src="js/script.js"></script>
+    <link rel="preconnect" href="https://fonts.gstatic.com">
+    <link href="https://fonts.googleapis.com/css2?family=Raleway:wght@100&family=Ubuntu:wght@300&display=swap" rel="stylesheet">
 
+    <!-- Bootstrap CSS -->
+    <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootswatch/4.5.2/lux/bootstrap.min.css" integrity="sha384-9+PGKSqjRdkeAU7Eu4nkJU8RFaH8ace8HGXnkiKMP9I9Te0GJ4/km3L1Z8tXigpG" crossorigin="anonymous">
+    <link rel="stylesheet" href="css/style.css" >
+<!--    <link rel="stylesheet" type="text/css" href="lib/terminal/terminal.css"/>-->
+    <!--Bootstrap libraries-->
+    <script src="https://code.jquery.com/jquery-3.3.1.slim.min.js" integrity="sha384-q8i/X+965DzO0rT7abK41JStQIAqVgRVzpbzo5smXKp4YfRvH+8abtTE1Pi6jizo" crossorigin="anonymous"></script>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+    <!--<script type="text/javascript" src="js/terminal/terminal.js"></script>-->
+    <script src="js/script.js"></script>
     <title>FS Simulator</title>
+
 </head>
 <body>
-<h1>Hello, world!</h1>
+<h1 class="site-heading text-center text-white d-none d-lg-block">
+    <span class="site-heading-upper text-primary mb-3">Welcome {{Username}}</span>
+    <span class="site-heading-lower">Noname File System</span>
+</h1>
+<!-- Navigation -->
+<nav class="navbar navbar-expand-lg navbar-dark py-lg-4" id="mainNav">
+    <div class="container">
+        <a class="navbar-brand text-uppercase text-expanded font-weight-bold d-lg-none" href="#">NoName FileSystem</a>
+        <button class="navbar-toggler" type="button" data-toggle="collapse" data-target="#navbarResponsive" aria-controls="navbarResponsive" aria-expanded="false" aria-label="Toggle navigation">
+            <span class="navbar-toggler-icon"></span>
+        </button>
+        <div class="collapse navbar-collapse" id="navbarResponsive">
+            <ul class="navbar-nav mx-auto">
+                <li class="nav-item active px-lg-4">
+                    <a class="nav-link text-uppercase text-expanded" href="index.html">Home
+                        <span class="sr-only">(current)</span>
+                    </a>
+                </li>
+                <li class="nav-item active px-lg-4">
+                    <a class="nav-link text-uppercase text-expanded" href="index.html">Sign out</a>
+                </li>
+            </ul>
+        </div>
+    </div>
+</nav>
+
+<section class="page-section clearfix">
+    <div id="container">
+        <div id="terminal-div" class="mt-4">
+            <!-- Terminal Bar -->
+            <div id="terminal_bar">
+                <div id="bar_buttons">
+                    <button class="bar_button" id="bar_button-exit">&#10005;</button>
+                    <button class="bar_button">&#9472;</button>
+                    <button class="bar_button">&#9723;</button>
+                </div>
+                <p id="bar_user">myuser@ubuntu: ~</p>
+            </div>
+            <!-- Terminal Body -->
+            <div id="terminal_body">
+                <div id="terminal_prompt" class="prompt0">
+                    <span id="terminal_prompt-user">myuser@ubuntu:</span>
+                    <span id="terminal_prompt-location">~</span>
+                    <div class="line">
+                        <input class="cmdline" id="cmdline0" autofocus />
+                        <div id="spanResponse"><p id="responseLine0"></p></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<section class="page-section cta">
+    <div class="container">
+        <div class="row">
+            <div class="col-xl-9 mx-auto">
+                <div class="cta-inner text-center rounded">
+                    <h2 class="section-heading mb-4">
+                        <span class="section-heading-upper">How to use it</span>
+                    </h2>
+                    <p class="mb-0">If you have doubts of how to use the file system please see the attached document below to get more information:</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<footer class="footer text-faded text-center py-5">
+    <div class="container">
+        <p class="m-0 small">Copyright &copy; Your Website 2020</p>
+    </div>
+</footer>
 
 </body>
 </html>
