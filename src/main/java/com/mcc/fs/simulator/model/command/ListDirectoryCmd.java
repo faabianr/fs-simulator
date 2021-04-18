@@ -18,7 +18,7 @@ public class ListDirectoryCmd extends FSCommand {
         log.info("Executing command: {} with args: {}", getCommand(), args);
 
         // TODO implement method logic, this is just a sample return
-        return ".\n..\n";
+        return ".<br />..";
     }
 
 }

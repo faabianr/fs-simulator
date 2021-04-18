@@ -2,6 +2,7 @@ $( document ).ready( function() {
 
     var prompt_id=0;
     var cmdline = 0;
+    var responseCmd = 0;
 
     function init() {
       // Init first command line
@@ -10,10 +11,13 @@ $( document ).ready( function() {
                 if (keycode == '13') {
                   prompt_id++;
                   cmdline++;
-                  var html = executeCommand($("#cmdline0").val());
-                  alert("Comando enviado:" + html);
+                  executeCommand($("#cmdline0").val());
                   // When the user press enter it creates a new line in prompt
-                  writeNewLine();
+                  setTimeout(
+                    function()
+                    {
+                       writeNewLine();
+                    }, 500);
                 }
            });
     }
@@ -23,7 +27,13 @@ $( document ).ready( function() {
         // Create a clone of the terminal prompt line and put a new id
         $("#terminal_prompt").clone().appendTo("#terminal_body").each(function(){
            $(this).attr("class", "prompt"+(prompt_id));
-           var newcmdLine = $(this).find("input")
+
+           var responseLine = $(this).find("#spanResponse p");
+           responseCmd++;
+           responseLine.attr("id", "responseLine" + responseCmd);
+           responseLine.text("");
+
+           var newcmdLine = $(this).find("input");
            newcmdLine.attr("id", "cmdline" + cmdline);
            newcmdLine.val("");
            newcmdLine.focus();
@@ -33,19 +43,22 @@ $( document ).ready( function() {
                  var commandValue =  newcmdLine.val();
                     prompt_id++;
                     cmdline++;
-                    var html = executeCommand(commandValue);
-                    alert("Comando enviado:" + html);
-                    writeNewLine();
+                    executeCommand(commandValue);
+                    setTimeout(
+                        function()
+                        {
+                           writeNewLine();
+                        }, 500);
                  }
            });
       });
     }
 
       function executeCommand(command){
+          var commandResponse = "";
           var executionRequest = {
                "input": command
           };
-          
           $.ajax({
                 url: 'filesystem/commands',
                 dataType: 'json',
@@ -54,9 +67,19 @@ $( document ).ready( function() {
                 contentType: 'application/json',
                 Accept: 'application/json',
                 cache : false,
-                success: function(resultData) { alert('Command read') }
+                success: function(resultData) {
+                    commandResponse = resultData.output;
+                    var pID = "#responseLine" + responseCmd;
+                    var response = $(pID).html(commandResponse);
+                    $(pID).append(response);
+                },
+                error: function(errorData){
+                   commandResponse = "Invalid Command";
+                   var pID = "#responseLine" + responseCmd;
+                   $(pID).text(commandResponse);
+                 }
           });
-          return success;
+
       }
   init();
 });
