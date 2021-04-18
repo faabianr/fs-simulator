@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Data
-public class Directory {
-    private int inode;
-    private String name;
+public abstract class Block {
+    public static final int SIZE = 1024;
+
+    protected byte[] content;
 }

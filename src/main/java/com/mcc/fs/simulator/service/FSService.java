@@ -18,7 +18,7 @@ public class FSService {
     private final BootBlock bootBlock = new BootBlock();
     private final SuperBlock superBlock = new SuperBlock(); // this one contains the LBL and LIL
     private final InodeList inodeList = new InodeList();
-    private Directory rootDirectory;
+    private DirectoryBlock rootDirectory;
 
     public FSService() {
         bootBlock.init();
@@ -28,13 +28,11 @@ public class FSService {
     }
 
 
-
     private void initRootDirectory() {
         log.info("Initializing root directory ...");
         Inode rootDirectoryInode = Inode.builder()
                 .size(1024).type(FileType.DIRECTORY).owner(Defaults.OWNER).creationDate(new Date()).permissions(Defaults.PERMISSIONS).tableOfContents(new int[11]).build();
-
-        rootDirectory = new Directory(2, "root");
+        // TODO init root directory
     }
 
     public void writeDiskFile() {
