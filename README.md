@@ -12,6 +12,24 @@ After cloning the project:
 ### Rest API
 Swagger UI is included with this project so the Rest API can be easily explored. The Swagger UI can be found at: http://localhost:8080/v1/fs-simulator/swagger-ui.html
 
+## Architecture Specs
+* Blocks = 1K
+* Disk file = 1 MB
+* inode list = 4 blocks = 16 inodes per block = 64 inodes in total
+* 1 directory = 1 block = 1K
+* 1 directory entry = 16 bytes (2 bytes: inode number, 14 bytes: name)
+* Given above's point: 1 directory will contain 64 entries
+
+### Main Objects
+
+| Object        | Description  | 
+| -----------   | -----------  | 
+| Boot Block    | It mocks the boot block with a size of 1K. It is located at block #1 |  
+| Super Block   | Contains the LIL and LBL. The size of super block is 2 blocks = 2K |
+| Inodes List   | The inodes list contains all the inodes of the system. It uses 4 blocks of 1K. Each inode uses 64 bytes, given that, each block contains 16 inodes, so in total we have 64 inodes in our system |
+| Data Blocks   | 8th node is not used and 9th is used for root directory, so free blocks start from 10th block.|
+
+
 ## Available Commands
 | Command      | Description                     | Usage
 | -----------  | -----------                     | -----------                 |
