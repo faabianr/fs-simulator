@@ -14,6 +14,18 @@ import java.util.Date;
 @Service
 public class FSService {
 
+    /*
+     *
+     *  blocks:
+     *      1: boot block
+     *      2 - 3: super block (LIL, LBL)
+     *      4 - 7: inodes list
+     *      8: not used
+     *      9: root directory
+     *      10 - n : initial free data blocks
+     *
+     * */
+
     private static final String DISK_FILE_PATH = "./diskfile";
     private final BootBlock bootBlock = new BootBlock();
     private final SuperBlock superBlock = new SuperBlock(); // this one contains the LBL and LIL
@@ -30,9 +42,21 @@ public class FSService {
 
     private void initRootDirectory() {
         log.info("Initializing root directory ...");
+
+        int[] tableOfContents = new int[11];
+        tableOfContents[0] = 9;
+
         Inode rootDirectoryInode = Inode.builder()
-                .size(1024).type(FileType.DIRECTORY).owner(Defaults.OWNER).creationDate(new Date()).permissions(Defaults.PERMISSIONS).tableOfContents(new int[11]).build();
-        // TODO init root directory
+                .size(1024).type(FileType.DIRECTORY).owner(Defaults.OWNER).creationDate(new Date()).permissions(Defaults.PERMISSIONS).tableOfContents(tableOfContents).build();
+
+        DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((byte) 2).name("..").build();
+        DirectoryEntry currentDirectoryEntry = DirectoryEntry.builder().inode((byte) 2).name(".").build();
+
+        DirectoryBlock rootDirectory = new DirectoryBlock();
+        rootDirectory.addEntry(parentDirectoryEntry);
+        rootDirectory.addEntry(parentDirectoryEntry);
+
+        rootDirectory.writeToDisk();
     }
 
     public void writeDiskFile() {
