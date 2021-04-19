@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Data
-public class Directory {
-    private int inode;
+public class DirectoryEntry {
+    // directory entry = 16 bytes: 2 bytes for inode number and 14 bytes for name
+    private byte inode;
     private String name;
 }
