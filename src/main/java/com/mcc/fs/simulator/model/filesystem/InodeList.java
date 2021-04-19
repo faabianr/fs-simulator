@@ -28,4 +28,9 @@ public class InodeList {
         }
     }
 
+    public void registerInode(Inode inode, int position) {
+        log.info("Registering inode {}", position);
+        inodes[position - 1] = inode;
+    }
+
 }
