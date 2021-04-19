@@ -2,7 +2,7 @@ package com.mcc.fs.simulator.model.filesystem;
 
 public enum FileType {
 
-    DIRECTORY("d"), REGULAR_FILE("-"), CHARACTER("c"), PIPE("p"), LINK("l"), BLOCK("b");
+    DIRECTORY("d"), REGULAR_FILE("-"), FREE_INODE("0");
 
     private final String type;
 

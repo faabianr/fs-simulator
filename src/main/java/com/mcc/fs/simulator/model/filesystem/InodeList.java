@@ -24,7 +24,7 @@ public class InodeList {
         inodes = new Inode[64];
         log.info("Inode list size: {}", inodes.length);
         for (int i = 0; i < inodes.length; i++) {
-            inodes[i] = Inode.builder().size(0).type(FileType.REGULAR_FILE).owner(Defaults.OWNER).creationDate(new Date()).permissions(Defaults.PERMISSIONS).tableOfContents(new int[11]).build();
+            inodes[i] = Inode.builder().size(0).type(FileType.FREE_INODE).owner(Defaults.OWNER).creationDate(new Date()).permissions(Defaults.PERMISSIONS).tableOfContents(new int[11]).build();
         }
     }
 
