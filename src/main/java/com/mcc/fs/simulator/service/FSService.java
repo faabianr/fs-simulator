@@ -18,7 +18,6 @@ public class FSService {
     private final BootBlock bootBlock = new BootBlock();
     private final SuperBlock superBlock = new SuperBlock(); // this one contains the LBL and LIL
     private final InodeList inodeList = new InodeList();
-    private DirectoryBlock rootDirectory;
 
     public FSService() {
         bootBlock.init();
