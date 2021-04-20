@@ -1,9 +1,7 @@
 package com.mcc.fs.simulator.service;
 
 import com.mcc.fs.simulator.exception.InvalidCommandException;
-import com.mcc.fs.simulator.model.command.CreateDirectoryCmd;
-import com.mcc.fs.simulator.model.command.FSCommand;
-import com.mcc.fs.simulator.model.command.ListDirectoryCmd;
+import com.mcc.fs.simulator.model.command.*;
 import com.mcc.fs.simulator.model.network.ExecutionRequest;
 import com.mcc.fs.simulator.model.network.ExecutionResponse;
 import lombok.extern.slf4j.Slf4j;
@@ -30,6 +28,12 @@ public class FSCommandsService {
         // Registering commands
         registerCommand(new CreateDirectoryCmd());
         registerCommand(new ListDirectoryCmd());
+        registerCommand(new RemoveDirectoryCmd());
+        registerCommand(new MoveDirectoryCmd());
+        registerCommand(new CreateFileCmd());
+        registerCommand(new RemoveFileCmd());
+        registerCommand(new MoveFileCmd());
+        registerCommand(new CopyFileCmd());
     }
 
     private void registerCommand(FSCommand fsCommand) {

@@ -10,6 +10,7 @@ import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Arrays;
 import java.util.Date;
+import java.util.List;
 
 @Service
 public class FSService {
@@ -72,7 +73,42 @@ public class FSService {
 
         rootDirectory = new Directory(2, "root");
     }
-
+    
+    public String listdir(){
+        String list= ".<br/>..";
+        return list;
+    }
+    
+    public String CreateDir(){
+        String created= ".<br/>..";
+        return created;
+    }
+    
+    public String RemoveDir(){
+        String removed= ".<br/>..";
+        return removed;
+    }
+    public String MoveDir(){
+        String moveto= ".<br/>..";
+        return moveto;
+    }
+    public String CreateFile(){
+        String craetef= ".<br/>..";
+        return craetef;
+    }
+    public String RemoveFile(){
+        String revomed= ".<br/>..";
+        return revomed;
+    }
+    public String MoveFile(){
+        String movef= ".<br/>..";
+        return movef;
+    }
+    public String CopyFile(){
+        String copyf= ".<br/>..";
+        return copyf;
+    }
+    
     public void writeDiskFile() {
         try {
             long offset = 0;
