@@ -4,24 +4,24 @@ import com.mcc.fs.simulator.service.FSService;
 import lombok.extern.slf4j.Slf4j;
 
 @Slf4j
-public class CreateDirectoryCmd extends FSCommand {
-    private static final String COMMAND = "createdir";
-    private static final String DESCRIPTION = "Creates a directory in current's location";
-    private static final String USAGE = "createdir <dirname>";
-
-    public CreateDirectoryCmd() {
+public class MoveFileCmd extends FSCommand {
+    private static final String COMMAND = "movef";
+    private static final String DESCRIPTION = "Moves a file in current's location to another location";
+    private static final String USAGE = "movef <filename> <newlocation>";
+    
+    public MoveFileCmd() {
         super(COMMAND, DESCRIPTION, USAGE);
     }
-
+    
     @Override
     public String execute(FSService fsService, String args) {
         log.info("Executing command: {} with args: {}", getCommand(), args);
         if (args != null && !args.isEmpty()) {
-            fsService.CreateDir();
+            fsService.MoveFile();
         }else {
-            return "Please follow the next form: createdir (dirname)";
+            return "Please follow the next form: movef (filename) (newlocation)";
         }
         // TODO implement method logic, this is just a sample return
-        return "directory " + args + " created.\n";
+        return "file " + args + " moved.\n";
     }
 }

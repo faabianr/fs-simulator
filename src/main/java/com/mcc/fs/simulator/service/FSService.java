@@ -9,6 +9,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Date;
+import java.util.List;
 
 @Slf4j
 @Service
@@ -47,7 +48,42 @@ public class FSService {
         // TODO: not yet implemented
         rootDirectory.writeToDisk();
     }
-
+    
+    public String listdir(){
+        String list= ".<br/>..";
+        return list;
+    }
+    
+    public String CreateDir(){
+        String created= ".<br/>..";
+        return created;
+    }
+    
+    public String RemoveDir(){
+        String removed= ".<br/>..";
+        return removed;
+    }
+    public String MoveDir(){
+        String moveto= ".<br/>..";
+        return moveto;
+    }
+    public String CreateFile(){
+        String craetef= ".<br/>..";
+        return craetef;
+    }
+    public String RemoveFile(){
+        String revomed= ".<br/>..";
+        return revomed;
+    }
+    public String MoveFile(){
+        String movef= ".<br/>..";
+        return movef;
+    }
+    public String CopyFile(){
+        String copyf= ".<br/>..";
+        return copyf;
+    }
+    
     public void writeDiskFile() {
         RandomAccessFile diskFile = null;
 
