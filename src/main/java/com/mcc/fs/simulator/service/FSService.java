@@ -114,6 +114,10 @@ public class FSService {
             log.info("Setting file seek to={}", offset);
 
             // writing Inode Table
+            log.info("Writing Inode Table into disk file with fd={}", diskFile.getFD().toString());
+
+
+            // writing Inode Tabl
             /*
             log.info("Writing Inode Table into disk file with fd={}", diskFile.getFD().toString());
             diskFile.write(InodeTable);
