@@ -12,13 +12,13 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Data
+//@Data
 @Slf4j
-public class InodeList {
+public class InodeList extends Block {
     public static final int SIZE = 4096;
 
     private Inode[] inodes; // son 4 bloques de 1K, 16 inodes por bloque = 64 inodes en total
-
+    private byte[] inodeBlocks;
     public void init() {
         log.info("Initializing Inodes list ...");
         inodes = new Inode[64];
@@ -26,11 +26,15 @@ public class InodeList {
         for (int i = 0; i < inodes.length; i++) {
             inodes[i] = Inode.builder().size(0).type(FileType.FREE_INODE).owner(Defaults.OWNER).creationDate(new Date()).permissions(Defaults.PERMISSIONS).tableOfContents(new int[11]).build();
         }
+        inodeBlocks = new byte[SIZE];
+        writeToDisk(inodeBlocks, 3);
+        Read();
     }
 
     public void registerInode(Inode inode, int position) {
         log.info("Registering inode {}", position);
         inodes[position - 1] = inode;
+        log.info("inodelist: {}", inodes);
     }
 
 }

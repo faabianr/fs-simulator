@@ -6,7 +6,7 @@ import java.util.ArrayList;
 import java.util.List;
 
 @Slf4j
-public class DirectoryBlock extends Block {
+public class DirectoryBlock extends Disk {
 
     private static final int MAX_ALLOWED_ENTRIES = 64;
 

@@ -14,8 +14,8 @@ import java.util.List;
 @Slf4j
 @Service
 public class FSService {
+    
 
-    private static final String DISK_FILE_PATH = "./diskfile";
     private final BootBlock bootBlock = new BootBlock();
     private final SuperBlock superBlock = new SuperBlock(); // this one contains the LBL and LIL
     private final InodeList inodeList = new InodeList();
@@ -26,7 +26,6 @@ public class FSService {
         inodeList.init();
         initRootDirectory();
     }
-
     private void initRootDirectory() {
         log.info("Initializing root directory ...");
 
@@ -44,9 +43,8 @@ public class FSService {
         rootDirectory.addEntry(currentDirectoryEntry);
 
         inodeList.registerInode(rootDirectoryInode, Defaults.ROOT_DIRECTORY_INODE);
-
         // TODO: not yet implemented
-        rootDirectory.writeToDisk();
+        //rootDirectory.writeToDisk();
     }
     
     public String listdir(){
@@ -55,8 +53,8 @@ public class FSService {
     }
     
     public String CreateDir(){
-        String created= ".<br/>..";
-        return created;
+        log.info("Initializing directory ...");
+        return "created";
     }
     
     public String RemoveDir(){
@@ -84,34 +82,34 @@ public class FSService {
         return copyf;
     }
     
-    public void writeDiskFile() {
-        RandomAccessFile diskFile = null;
+    //public void writeDiskFile() {
+       // RandomAccessFile diskFile = null;
 
-        try {
-            long offset = 0;
-            log.info("Opening disk file in {} mode", FileAccessMode.READ_WRITE);
-            diskFile = new RandomAccessFile(DISK_FILE_PATH, FileAccessMode.READ_WRITE.toString());
+        //try {
+            //long offset = 0;
+            //log.info("Opening disk file in {} mode", FileAccessMode.READ_WRITE);
+            //diskFile = new RandomAccessFile(DISK_FILE_PATH, FileAccessMode.READ_WRITE.toString());
 
             // writing boot
-            log.info("Writing boot into disk file with fd={}", diskFile.getFD().toString());
-            diskFile.write(bootBlock.getContent());
-            offset += BootBlock.SIZE;
-            diskFile.seek(offset);
-            log.info("Setting file seek to={}", offset);
+            //log.info("Writing boot into disk file with fd={}", diskFile.getFD().toString());
+            //diskFile.write(bootBlock.getContent());
+            //offset += BootBlock.SIZE;
+            //diskFile.seek(offset);
+            //log.info("Setting file seek to={}", offset);
 
             // writing LIL
-            log.info("Writing LIL into disk file with fd={}", diskFile.getFD().toString());
-            diskFile.write(superBlock.getLIL());
-            offset += superBlock.getLIL().length;
-            diskFile.seek(offset);
-            log.info("Setting file seek to={}", offset);
+            //log.info("Writing LIL into disk file with fd={}", diskFile.getFD().toString());
+           // diskFile.write(superBlock.getLIL());
+            //offset += superBlock.getLIL().length;
+            //diskFile.seek(offset);
+            //log.info("Setting file seek to={}", offset);
 
             // writing LBL
-            log.info("Writing LBL into disk file with fd={}", diskFile.getFD().toString());
-            diskFile.write(superBlock.getLBL());
-            offset += superBlock.getLBL().length;
-            diskFile.seek(offset);
-            log.info("Setting file seek to={}", offset);
+            //log.info("Writing LBL into disk file with fd={}", diskFile.getFD().toString());
+            //diskFile.write(superBlock.getLBL());
+            //offset += superBlock.getLBL().length;
+            //diskFile.seek(offset);
+            //log.info("Setting file seek to={}", offset);
 
             // writing Inode Table
             /*
@@ -138,45 +136,45 @@ public class FSService {
             log.info("Setting file seek to={}", offset);
             */
 
-        } catch (FileNotFoundException e) {
-            log.error("Unable to create disk file. Cause: {}", e.getMessage(), e);
-            System.exit(1);
-        } catch (IOException e) {
-            log.error("Unable to write to disk file. Cause: {}", e.getMessage(), e);
-            System.exit(1);
-        } finally {
-            if (diskFile != null) {
-                try {
-                    log.info("Closing disk file with fd={}", diskFile.getFD().toString());
-                    diskFile.close();
-                } catch (IOException e) {
-                    log.error("Unable to close diskfile", e);
-                }
-            }
-        }
+        //} catch (FileNotFoundException e) {
+           // log.error("Unable to create disk file. Cause: {}", e.getMessage(), e);
+           // System.exit(1);
+        //} catch (IOException e) {
+           // log.error("Unable to write to disk file. Cause: {}", e.getMessage(), e);
+           // System.exit(1);
+        //} finally {
+          //  if (diskFile != null) {
+           //     try {
+            //        log.info("Closing disk file with fd={}", diskFile.getFD().toString());
+            //        diskFile.close();
+            //    } catch (IOException e) {
+                   // log.error("Unable to close diskfile", e);
+            //    }
+            //}
+        //}
 
-    }
+    //}
 
-    public void readDiskFile() {
-        RandomAccessFile diskFile = null;
+    //public void readDiskFile() {
+        //RandomAccessFile diskFile = null;
 
-        try {
-            log.info("Opening disk file in {} mode", FileAccessMode.READ);
-            diskFile = new RandomAccessFile(DISK_FILE_PATH, FileAccessMode.READ.toString());
-            byte[] content = new byte[(int) diskFile.length()];
-            log.info("Reading disk file");
-            diskFile.read(content);
-            int counter = 0;
+        //try {
+         //   log.info("Opening disk file in {} mode", FileAccessMode.READ);
+          //  diskFile = new RandomAccessFile(DISK_FILE_PATH, FileAccessMode.READ.toString());
+          //  byte[] content = new byte[(int) diskFile.length()];
+          //  log.info("Reading disk file");
+           // diskFile.read(content);
+          //  int counter = 0;
 
-            for (byte b : content) {
+         /*   for (byte b : content) {
                 if (counter == 1024) {
                     System.out.print("\n");
                     counter = 0;
                 }
                 System.out.print(b);
                 counter++;
-            }
-        } catch (IOException e) {
+            }*/
+   /*     } catch (IOException e) {
             log.error("Unable to read disk file. Cause: {}", e.getMessage(), e);
             System.exit(1);
         } finally {
@@ -189,6 +187,6 @@ public class FSService {
                 }
             }
         }
-    }
-
+    }*/
+    
 }

@@ -11,9 +11,9 @@ import java.util.Arrays;
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
-@Data
+//@Data
 @Slf4j
-public class SuperBlock {
+public class SuperBlock extends Disk{
 
     public static final int SIZE = 2048;
 
@@ -30,9 +30,14 @@ public class SuperBlock {
         log.info("Initializing LBL ...");
         LBL = new byte[1024];
         Arrays.fill(LBL, (byte) 0);
-        LBL[0] = 9;
-        LBL[1] = 10;
-        LBL[2] = 11;
+        byte startInode = 9;
+        for (byte i = 0; i < 120; i++) {
+            if((i % 4) == 0){
+                LBL[i] = startInode;
+                startInode++;
+            }
+        }
+        writeToDisk(LBL, 1);
     }
 
     private void initLIL() {
@@ -40,13 +45,13 @@ public class SuperBlock {
         LIL = new byte[1024];
         Arrays.fill(LIL, (byte) 0);
         byte startInode = 3;
-        for (byte i = 0; i <= 16; i++) {
-            LIL[i] = startInode;
-            startInode++;
+        for (byte i = 0; i < 120; i++) {
+            if((i % 4) == 0){
+                LIL[i] = startInode;
+                startInode++;
+            }
         }
-        LIL[0] = 3;
-        LIL[1] = 4;
-        LIL[2] = 5;
+        writeToDisk(LIL, 2);
     }
 
 }
