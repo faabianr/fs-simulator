@@ -1,6 +1,6 @@
 package com.mcc.fs.simulator.service;
 
-import com.mcc.fs.simulator.config.Defaults;
+import com.mcc.fs.simulator.config.Constants;
 import com.mcc.fs.simulator.model.filesystem.*;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -9,7 +9,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Date;
-import java.util.List;
 
 @Slf4j
 @Service
@@ -34,7 +33,7 @@ public class FSService {
         tableOfContents[0] = 9;
 
         Inode rootDirectoryInode = Inode.builder()
-                .size(1024).type(FileType.DIRECTORY).owner(Defaults.OWNER).creationDate(new Date()).permissions(Defaults.PERMISSIONS).tableOfContents(tableOfContents).build();
+                .size(1024).type(FileType.DIRECTORY).owner(Constants.DEFAULT_OWNER).creationDate(new Date()).permissions(Constants.DEFAULT_PERMISSIONS).tableOfContents(tableOfContents).build();
 
         DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((byte) 2).name("..").build();
         DirectoryEntry currentDirectoryEntry = DirectoryEntry.builder().inode((byte) 2).name(".").build();
@@ -43,7 +42,7 @@ public class FSService {
         rootDirectory.addEntry(parentDirectoryEntry);
         rootDirectory.addEntry(currentDirectoryEntry);
 
-        inodeList.registerInode(rootDirectoryInode, Defaults.ROOT_DIRECTORY_INODE);
+        inodeList.registerInode(rootDirectoryInode, Constants.ROOT_DIRECTORY_INODE);
 
         // TODO: not yet implemented
         rootDirectory.writeToDisk();
@@ -117,7 +116,7 @@ public class FSService {
             log.info("Writing Inode Table into disk file with fd={}", diskFile.getFD().toString());
 
 
-            // writing Inode Tabl
+            // writing Inode Table
             /*
             log.info("Writing Inode Table into disk file with fd={}", diskFile.getFD().toString());
             diskFile.write(InodeTable);
