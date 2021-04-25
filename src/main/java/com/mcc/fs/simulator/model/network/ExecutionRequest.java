@@ -10,5 +10,6 @@ import lombok.NoArgsConstructor;
 @Builder
 @Data
 public class ExecutionRequest {
+    private int userId;
     private String input;
 }
