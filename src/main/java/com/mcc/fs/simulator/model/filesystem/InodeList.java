@@ -34,6 +34,10 @@ public class InodeList {
         inodes[position - 1] = inode;
     }
 
+    public Inode getInodeByPosition(int position) {
+        return inodes[position - 1];
+    }
+
     public Inode[] getInodes() {
         return inodes;
     }

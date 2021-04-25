@@ -1,5 +1,7 @@
 package com.mcc.fs.simulator.model.helper;
 
+import com.mcc.fs.simulator.exception.TooLargeFileException;
+import com.mcc.fs.simulator.model.filesystem.Block;
 import com.mcc.fs.simulator.model.filesystem.FilePermission;
 import com.mcc.fs.simulator.model.filesystem.FileType;
 import com.mcc.fs.simulator.model.filesystem.Inode;
@@ -11,6 +13,7 @@ import java.io.ByteArrayInputStream;
 import java.io.DataInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 /**
@@ -84,6 +87,34 @@ public class DiskHelper {
         log.info("inode from bytearray: {}", inode.toString());
 
         return inode;
+    }
+
+    /**
+     * Returns the {@link String} value of a block's content.
+     *
+     * @param block the block that will be read and converted into string.
+     * @return an string representing the block's content.
+     */
+    public String blockContentToString(Block block) {
+        return new String(block.getContent(), StandardCharsets.UTF_8);
+    }
+
+    /**
+     * Creates an instance of a {@link Block} using the given content value.
+     *
+     * @param content the value of the content.
+     * @return a block instance.
+     */
+    public Block contentToBlock(String content) {
+        log.info("converting content={} to a block object", content);
+        byte[] bytes = content.getBytes(StandardCharsets.UTF_8);
+
+        if (bytes.length > Block.BYTES) {
+            log.error("the file is too large to be stored (size={})", bytes.length);
+            throw new TooLargeFileException();
+        }
+
+        return Block.builder().content(bytes).build();
     }
 
 }
