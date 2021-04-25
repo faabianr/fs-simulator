@@ -2,6 +2,7 @@ package com.mcc.fs.simulator.service;
 
 import com.mcc.fs.simulator.config.Constants;
 import com.mcc.fs.simulator.model.filesystem.*;
+import com.mcc.fs.simulator.model.helper.DiskHelper;
 import com.mcc.fs.simulator.model.users.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -15,15 +16,16 @@ import java.util.Date;
 @Service
 public class FSService {
 
-    private static final String DISK_FILE_PATH = "./diskfile";
     private final BootBlock bootBlock = new BootBlock();
     private final SuperBlock superBlock = new SuperBlock(); // this one contains the LBL and LIL
     private final InodeList inodeList = new InodeList();
 
     private final UsersService usersService;
+    private final DiskHelper diskHelper;
 
-    public FSService(UsersService usersService) {
+    public FSService(UsersService usersService, DiskHelper diskHelper) {
         this.usersService = usersService;
+        this.diskHelper = diskHelper;
         bootBlock.init();
         superBlock.init();
         inodeList.init(usersService.getUserByUsername(Constants.DEFAULT_OWNER));
@@ -49,9 +51,6 @@ public class FSService {
         rootDirectory.addEntry(currentDirectoryEntry);
 
         inodeList.registerInode(rootDirectoryInode, Constants.ROOT_DIRECTORY_INODE);
-
-        // TODO: not yet implemented
-        rootDirectory.writeToDisk();
     }
 
     public String listdir() {
@@ -100,7 +99,7 @@ public class FSService {
         try {
             long offset = 0;
             log.info("Opening disk file in {} mode", FileAccessMode.READ_WRITE);
-            diskFile = new RandomAccessFile(DISK_FILE_PATH, FileAccessMode.READ_WRITE.toString());
+            diskFile = new RandomAccessFile(Constants.DISK_FILE_PATH, FileAccessMode.READ_WRITE.toString());
 
             // writing boot
             log.info("Writing boot into disk file with fd={}", diskFile.getFD().toString());
@@ -124,8 +123,18 @@ public class FSService {
             log.info("Setting file seek to={}", offset);
 
             // writing Inode Table
+            // TODO: Remove this inode writing test
             log.info("Writing Inode Table into disk file with fd={}", diskFile.getFD().toString());
+            Inode rootyDirInode = inodeList.getInodes()[Constants.ROOT_DIRECTORY_INODE - 1];
+            byte[] rootDirectoryBytes = diskHelper.inodeToByteArray(rootyDirInode);
+            diskFile.write(rootDirectoryBytes);
+            offset += Inode.BYTES;
+            diskFile.seek(offset);
+            log.info("Setting file seek to={}", offset);
 
+            log.info("Reading root directory inode from bytes");
+            Inode rootDirInodeFromBytes = diskHelper.byteArrayToInode(rootDirectoryBytes);
+            log.info("root directory inode from bytes = {}", rootDirInodeFromBytes.toString());
 
             // writing Inode Table
             /*
@@ -176,7 +185,7 @@ public class FSService {
 
         try {
             log.info("Opening disk file in {} mode", FileAccessMode.READ);
-            diskFile = new RandomAccessFile(DISK_FILE_PATH, FileAccessMode.READ.toString());
+            diskFile = new RandomAccessFile(Constants.DISK_FILE_PATH, FileAccessMode.READ.toString());
             byte[] content = new byte[(int) diskFile.length()];
             log.info("Reading disk file");
             diskFile.read(content);
