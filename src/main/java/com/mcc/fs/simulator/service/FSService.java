@@ -136,6 +136,20 @@ public class FSService {
             }
             log.info("Finished writing Inode List");
 
+            // writing data blocks
+            log.info("Writing empty data blocks into disk file with fd={}", diskFile.getFD().toString());
+            int totalFreeDataBlocks = 1017; // 7 blocks of 1K are already in use
+            for (int i = 0; i < totalFreeDataBlocks; i++) {
+                Block emptyBlock = new Block();
+                emptyBlock.initEmpty();
+
+                diskFile.write(emptyBlock.getContent());
+                offset += Block.BYTES;
+                diskFile.seek(offset);
+                log.info("Setting file seek to={}", offset);
+            }
+            log.info("wrote {} blocks of 1K", totalFreeDataBlocks);
+
             /*
             // writing root directory
             log.info("Writing inode root directory into disk file with fd={}", diskFile.getFD().toString());
