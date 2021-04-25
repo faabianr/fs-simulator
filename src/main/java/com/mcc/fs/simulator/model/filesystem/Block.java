@@ -21,8 +21,4 @@ public class Block {
         Arrays.fill(content, (byte) 0);
     }
 
-    public void writeToDisk() {
-        // TODO implement
-        log.info("Writing content to disk. Content={}", content);
-    }
 }
