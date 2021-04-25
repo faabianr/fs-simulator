@@ -125,28 +125,18 @@ public class FSService {
             diskFile.seek(offset);
             log.info("Setting file seek to={}", offset);
 
-            // writing Inode Table
-            // TODO: Remove this inode writing test
-            log.info("Writing Inode Table into disk file with fd={}", diskFile.getFD().toString());
-            Inode rootyDirInode = inodeList.getInodes()[Constants.ROOT_DIRECTORY_INODE - 1];
-            byte[] rootDirectoryBytes = diskHelper.inodeToByteArray(rootyDirInode);
-            diskFile.write(rootDirectoryBytes);
-            offset += Inode.BYTES;
-            diskFile.seek(offset);
-            log.info("Setting file seek to={}", offset);
+            // writing Inode List
+            log.info("Writing Inode List into disk file with fd={}", diskFile.getFD().toString());
+            for (Inode inode : inodeList.getInodes()) {
+                byte[] inodeBytes = diskHelper.inodeToByteArray(inode);
+                diskFile.write(inodeBytes);
+                offset += Inode.BYTES;
+                diskFile.seek(offset);
+                log.info("Setting file seek to={}", offset);
+            }
+            log.info("Finished writing Inode List");
 
-            log.info("Reading root directory inode from bytes");
-            Inode rootDirInodeFromBytes = diskHelper.byteArrayToInode(rootDirectoryBytes);
-            log.info("root directory inode from bytes = {}", rootDirInodeFromBytes.toString());
-
-            // writing Inode Table
             /*
-            log.info("Writing Inode Table into disk file with fd={}", diskFile.getFD().toString());
-            diskFile.write(InodeTable);
-            offset += InodeTable.length;
-            diskFile.seek(offset);
-            log.info("Setting file seek to={}", offset);
-
             // writing root directory
             log.info("Writing inode root directory into disk file with fd={}", diskFile.getFD().toString());
             offset = (LBL.length * 3L) + 1; // es +1 porque el primer inodo no se usa
