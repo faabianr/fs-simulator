@@ -2,6 +2,7 @@ package com.mcc.fs.simulator.service;
 
 import com.mcc.fs.simulator.config.Constants;
 import com.mcc.fs.simulator.model.filesystem.*;
+import com.mcc.fs.simulator.model.users.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -19,10 +20,13 @@ public class FSService {
     private final SuperBlock superBlock = new SuperBlock(); // this one contains the LBL and LIL
     private final InodeList inodeList = new InodeList();
 
-    public FSService() {
+    private final UsersService usersService;
+
+    public FSService(UsersService usersService) {
+        this.usersService = usersService;
         bootBlock.init();
         superBlock.init();
-        inodeList.init();
+        inodeList.init(usersService.getUserByUsername(Constants.DEFAULT_OWNER));
         initRootDirectory();
     }
 
@@ -32,8 +36,10 @@ public class FSService {
         int[] tableOfContents = new int[11];
         tableOfContents[0] = 9;
 
+        User rootUser = usersService.getUserByUsername(Constants.DEFAULT_OWNER);
+
         Inode rootDirectoryInode = Inode.builder()
-                .size(1024).type(FileType.DIRECTORY).owner(Constants.DEFAULT_OWNER).creationDate(new Date()).permissions(Constants.DEFAULT_PERMISSIONS).tableOfContents(tableOfContents).build();
+                .size(DirectoryBlock.BYTES).type(FileType.DIRECTORY).owner(rootUser).creationDate(new Date()).permissions(Constants.DEFAULT_PERMISSIONS).tableOfContents(tableOfContents).build();
 
         DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((byte) 2).name("..").build();
         DirectoryEntry currentDirectoryEntry = DirectoryEntry.builder().inode((byte) 2).name(".").build();
@@ -47,42 +53,47 @@ public class FSService {
         // TODO: not yet implemented
         rootDirectory.writeToDisk();
     }
-    
-    public String listdir(){
-        String list= ".<br/>..";
+
+    public String listdir() {
+        String list = ".<br/>..";
         return list;
     }
-    
-    public String CreateDir(){
-        String created= ".<br/>..";
+
+    public String CreateDir() {
+        String created = ".<br/>..";
         return created;
     }
-    
-    public String RemoveDir(){
-        String removed= ".<br/>..";
+
+    public String RemoveDir() {
+        String removed = ".<br/>..";
         return removed;
     }
-    public String MoveDir(){
-        String moveto= ".<br/>..";
+
+    public String MoveDir() {
+        String moveto = ".<br/>..";
         return moveto;
     }
-    public String CreateFile(){
-        String craetef= ".<br/>..";
+
+    public String CreateFile() {
+        String craetef = ".<br/>..";
         return craetef;
     }
-    public String RemoveFile(){
-        String revomed= ".<br/>..";
+
+    public String RemoveFile() {
+        String revomed = ".<br/>..";
         return revomed;
     }
-    public String MoveFile(){
-        String movef= ".<br/>..";
+
+    public String MoveFile() {
+        String movef = ".<br/>..";
         return movef;
     }
-    public String CopyFile(){
-        String copyf= ".<br/>..";
+
+    public String CopyFile() {
+        String copyf = ".<br/>..";
         return copyf;
     }
-    
+
     public void writeDiskFile() {
         RandomAccessFile diskFile = null;
 
@@ -94,7 +105,7 @@ public class FSService {
             // writing boot
             log.info("Writing boot into disk file with fd={}", diskFile.getFD().toString());
             diskFile.write(bootBlock.getContent());
-            offset += BootBlock.SIZE;
+            offset += BootBlock.BYTES;
             diskFile.seek(offset);
             log.info("Setting file seek to={}", offset);
 

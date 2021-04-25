@@ -15,7 +15,7 @@ import java.util.Arrays;
 @Slf4j
 public class SuperBlock {
 
-    public static final int SIZE = 2048;
+    public static final int BYTES = 2048;
 
     private byte[] LBL; // 256 bloques en 1k
     private byte[] LIL; // 16 numeros de inodos libres
@@ -28,7 +28,7 @@ public class SuperBlock {
 
     private void initLBL() {
         log.info("Initializing LBL ...");
-        LBL = new byte[1024];
+        LBL = new byte[Block.BYTES];
         Arrays.fill(LBL, (byte) 0);
         LBL[0] = 9;
         LBL[1] = 10;
@@ -37,7 +37,7 @@ public class SuperBlock {
 
     private void initLIL() {
         log.info("Initializing LIL ...");
-        LIL = new byte[1024];
+        LIL = new byte[Block.BYTES];
         Arrays.fill(LIL, (byte) 0);
         byte startInode = 3;
         for (byte i = 0; i <= 16; i++) {

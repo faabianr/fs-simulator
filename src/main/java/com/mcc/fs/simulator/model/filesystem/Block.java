@@ -10,7 +10,7 @@ import lombok.extern.slf4j.Slf4j;
 @Data
 @Slf4j
 public abstract class Block {
-    public static final int SIZE = 1024;
+    public static final int BYTES = 1024;
 
     protected byte[] content;
 
