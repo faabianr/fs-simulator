@@ -13,6 +13,9 @@ import java.io.IOException;
 import java.nio.ByteBuffer;
 import java.util.Date;
 
+/**
+ * Helper service used to perform disk-related operations.
+ */
 @Slf4j
 @Service
 public class DiskHelper {
@@ -23,6 +26,12 @@ public class DiskHelper {
         this.usersService = usersService;
     }
 
+    /**
+     * Converts a {@link Inode} object into an array of bytes.
+     *
+     * @param inode the inode object to convert.
+     * @return a byte array representing the given object.
+     */
     public byte[] inodeToByteArray(Inode inode) {
         log.info("converting inode to byte arrray with info={}", inode);
 
@@ -43,6 +52,12 @@ public class DiskHelper {
         return bytes;
     }
 
+    /**
+     * Creates an instance of an {@link Inode} class from an array of bytes.
+     *
+     * @param bytes the bytes array used to create the inode.
+     * @return an instance of an inode.
+     */
     public Inode byteArrayToInode(byte[] bytes) throws IOException {
         DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
 
