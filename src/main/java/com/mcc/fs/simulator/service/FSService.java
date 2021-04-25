@@ -30,6 +30,9 @@ public class FSService {
         superBlock.init();
         inodeList.init(usersService.getUserByUsername(Constants.DEFAULT_OWNER));
         initRootDirectory();
+
+        // This will happen only at startup
+        writeDiskFile();
     }
 
     private void initRootDirectory() {
