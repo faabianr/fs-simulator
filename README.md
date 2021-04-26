@@ -38,8 +38,10 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 | removef      | Removes a file                    | removef [file name]             |
 | removedir    | Removes a directory               | removedir [directoy name]       |
 | copyf        | Copies a file in directory        | copyf [file name] [directory]   |
-| copydir      | Copies a directory in directory   | copydir [dir Name] [directory]  |
+| copydir      | Copies a directory in directory   | copydir [dir name] [directory]  |
 | listdir      | Displays directory's content      | listdir                         |
+| showf        | Displays file's content           | showf [file_name]                         |
+
 
 
 ## Algorithms
