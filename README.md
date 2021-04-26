@@ -43,18 +43,20 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 
 
 ## Algorithms
-### Createdir 
+### Createdir command
 ![alt text](https://www.websequencediagrams.com/files/render?link=pDiOofWbzbbVEXAlewnpTMHY8cUHixMvp9pgUeg0n0RrqG1rssxGC0xWiVLRJWJq)
-### Createf
+### Createf command
 ![alt_text](https://www.websequencediagrams.com/files/render?link=XXmG3ZP3OdbNFgCOOEmZSwgC7KTnm3vjg5oIGEw3AeTwzo1VDEJSY21DW2CejLNo)
-### Removef
+### Removef command
 ![alt_text](https://www.websequencediagrams.com/files/render?link=V3HbFHo23mbmKyt1Es75sgGXkcKCBoinyYnPUrqZHyCRuyaS71PfERu79BcSimiR)
-### Removedir
+### Removedir command
 ![alt_text](https://www.websequencediagrams.com/files/render?link=zjygWzUMB7s84nlcmZiW1oZwdmVyAQHCtUAoMyKzYixE5STAIl0f1XWqjia4cKJP)
-### ListDir
+### ListDir command
 ![alt_text](https://www.websequencediagrams.com/files/render?link=Disaw4xD5j9IpEddtja9N0pnvXW5SVQZPzCIvwWOC4swrKcULMH7AfWo7TNE4MLH)
-## Copyf or copydir
+## Copyf or copydir command
 ![alt_text](https://www.websequencediagrams.com/files/render?link=MpoNFVOFdc3lQx9VA1EDy5EmyegoarR7N5oji2PpgujA4Y3cHDPlAQoajH6VhqE8)
+## Showf command
+![alt_text](https://www.websequencediagrams.com/files/render?link=GJbYXJQ1fBJgdgSs4rROz1o7hIYNNm9CifkdUIFaXgb1ms5XIQe5PVjS8Aqv5EAM)
 
 ## Contributors
 * Mariam Castañeda
