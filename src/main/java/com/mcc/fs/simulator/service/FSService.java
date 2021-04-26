@@ -22,6 +22,7 @@ public class FSService {
 
     private final UsersService usersService;
     private final DiskHelper diskHelper;
+    private DirectoryBlock directoryBlock;
 
     public FSService(UsersService usersService, DiskHelper diskHelper) {
         this.usersService = usersService;
@@ -49,9 +50,9 @@ public class FSService {
         DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((byte) 2).name("..").build();
         DirectoryEntry currentDirectoryEntry = DirectoryEntry.builder().inode((byte) 2).name(".").build();
 
-        DirectoryBlock rootDirectory = new DirectoryBlock();
-        rootDirectory.addEntry(parentDirectoryEntry);
-        rootDirectory.addEntry(currentDirectoryEntry);
+        directoryBlock = new DirectoryBlock();
+        directoryBlock.addEntry(parentDirectoryEntry);
+        directoryBlock.addEntry(currentDirectoryEntry);
 
         inodeList.registerInode(rootDirectoryInode, Constants.ROOT_DIRECTORY_INODE);
     }
@@ -150,23 +151,15 @@ public class FSService {
             }
             log.info("wrote {} blocks of 1K", totalFreeDataBlocks);
 
-            /*
             // writing root directory
             log.info("Writing inode root directory into disk file with fd={}", diskFile.getFD().toString());
-            offset = (LBL.length * 3L) + 1; // es +1 porque el primer inodo no se usa
-            log.info("offset={}", offset);
+            Inode directoryInode = inodeList.getInodeByPosition(Constants.ROOT_DIRECTORY_INODE);
+            int rootDirectoryBlock = directoryInode.getTableOfContents()[0];
+            offset = (long) rootDirectoryBlock * Block.BYTES;
+            log.info("Root directory block={}, offset={}", rootDirectoryBlock, offset);
             diskFile.seek(offset);
-            diskFile.write(rootDirectory.getInode());
-            log.info("Setting file seek to={}", offset);
-
-            log.info("Writing content root directory into disk file with fd={}", diskFile.getFD().toString());
-            offset += InodeTable.length - 2; // Le quitamos el 1 que contamos en el offset del inode root
-            log.info("offset={}", offset);
-            diskFile.seek(offset);
-            diskFile.writeChar('.');
-            diskFile.writeChars("..");
-            log.info("Setting file seek to={}", offset);
-            */
+            diskFile.write(diskHelper.directoryBlockToByteArray(directoryBlock));
+            log.info("root directory content created");
 
         } catch (FileNotFoundException e) {
             log.error("Unable to create disk file. Cause: {}", e.getMessage(), e);

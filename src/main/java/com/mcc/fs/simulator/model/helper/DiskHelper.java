@@ -1,10 +1,7 @@
 package com.mcc.fs.simulator.model.helper;
 
 import com.mcc.fs.simulator.exception.TooLargeFileException;
-import com.mcc.fs.simulator.model.filesystem.Block;
-import com.mcc.fs.simulator.model.filesystem.FilePermission;
-import com.mcc.fs.simulator.model.filesystem.FileType;
-import com.mcc.fs.simulator.model.filesystem.Inode;
+import com.mcc.fs.simulator.model.filesystem.*;
 import com.mcc.fs.simulator.service.UsersService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -117,4 +114,70 @@ public class DiskHelper {
         return Block.builder().content(bytes).build();
     }
 
+    /**
+     * Creates a byte array that represents the given {@link DirectoryBlock} object.
+     *
+     * @param directoryBlock the directory block to convert to byte array.
+     * @return a byte array representing the given input object.
+     */
+    public byte[] directoryBlockToByteArray(DirectoryBlock directoryBlock) {
+        byte[] bytes = new byte[DirectoryBlock.BYTES];
+
+        ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
+
+        for (DirectoryEntry entry : directoryBlock.getEntries()) {
+            byteBuffer.putShort(entry.getInode());
+
+            byte[] nameBytes = new byte[14];
+            byte[] originalNameBytes = entry.getName().getBytes(StandardCharsets.UTF_8);
+
+            System.arraycopy(originalNameBytes, 0, nameBytes, 0, originalNameBytes.length);
+            byteBuffer.put(nameBytes);
+        }
+
+        return bytes;
+    }
+
+    /**
+     * Creates an instance of a {@link DirectoryBlock} from the given byte array.
+     *
+     * @param bytes the byte array used to create the directory block.
+     * @return an instance of directory block.
+     */
+    public DirectoryBlock byteArrayToDirectoryBlock(byte[] bytes) throws IOException {
+        DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
+        DirectoryBlock directoryBlock = new DirectoryBlock();
+
+        int offset = 0;
+        for (int i = 0; i < DirectoryBlock.NUMBER_OF_ENTRIES; i++) {
+            DirectoryEntry directoryEntry = new DirectoryEntry();
+            directoryEntry.setInode(in.readShort());
+            offset += Short.BYTES;
+            byte[] nameBytes = new byte[14];
+
+            offset += in.read(nameBytes, offset, 14);
+            directoryEntry.setName(new String(nameBytes, StandardCharsets.UTF_8));
+
+            directoryBlock.addEntry(directoryEntry);
+        }
+
+        return directoryBlock;
+    }
+
+    /*
+    public static void main(String[] args) throws IOException {
+        DirectoryBlock directoryBlock = new DirectoryBlock();
+        for (int i = 0; i < 64; i++) {
+            DirectoryEntry entry = DirectoryEntry.builder().inode((short) i).name("file " + i).build();
+            directoryBlock.addEntry(entry);
+        }
+
+        byte[] directoryBlockBytes = directoryBlockToByteArray(directoryBlock);
+        DirectoryBlock result = byteArrayToDirectoryBlock(directoryBlockBytes);
+
+        for (DirectoryEntry entry : result.getEntries()) {
+            System.out.println("[entry] inode=" + entry.getInode() + ", name=" + entry.getName());
+        }
+    }
+*/
 }

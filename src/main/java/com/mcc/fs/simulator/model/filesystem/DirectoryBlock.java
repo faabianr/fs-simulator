@@ -8,7 +8,7 @@ import java.util.List;
 @Slf4j
 public class DirectoryBlock extends Block {
 
-    private static final int MAX_ALLOWED_ENTRIES = 64;
+    public static final int NUMBER_OF_ENTRIES = 64;
 
     private final List<DirectoryEntry> entries;
 
@@ -18,12 +18,12 @@ public class DirectoryBlock extends Block {
         entries = new ArrayList<>();
     }
 
+    public List<DirectoryEntry> getEntries() {
+        return entries;
+    }
+
     public void addEntry(DirectoryEntry entry) {
-        if (entries.size() < MAX_ALLOWED_ENTRIES) {
-            entries.add(entry);
-        } else {
-            log.error("unable to add entry, the dir has reached the maximum amount of entries.");
-        }
+        entries.add(entry);
     }
 
 }
