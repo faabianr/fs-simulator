@@ -47,8 +47,8 @@ public class FSService {
         Inode rootDirectoryInode = Inode.builder()
                 .size(DirectoryBlock.BYTES).type(FileType.DIRECTORY).owner(rootUser).creationDate(new Date()).permissions(Constants.DEFAULT_PERMISSIONS).tableOfContents(tableOfContents).build();
 
-        DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((byte) 2).name("..").build();
-        DirectoryEntry currentDirectoryEntry = DirectoryEntry.builder().inode((byte) 2).name(".").build();
+        DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) 2).name("..").build();
+        DirectoryEntry currentDirectoryEntry = DirectoryEntry.builder().inode((short) 2).name(".").build();
 
         directoryBlock = new DirectoryBlock();
         directoryBlock.addEntry(parentDirectoryEntry);
