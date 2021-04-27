@@ -9,7 +9,8 @@ import lombok.NoArgsConstructor;
 @NoArgsConstructor
 @Builder
 @Data
-public class ExecutionRequest {
-    private int userId;
-    private String input;
+public class UserLoginRequest {
+
+    private String username;
+
 }

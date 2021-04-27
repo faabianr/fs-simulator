@@ -1,16 +1,17 @@
 package com.mcc.fs.simulator.model.filesystem;
 
-import lombok.AllArgsConstructor;
-import lombok.Builder;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import lombok.*;
 
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
 @Data
+@ToString
 public class DirectoryEntry {
+
+    public static final int BYTES = 16;
+
     // directory entry = 16 bytes: 2 bytes for inode number and 14 bytes for name
-    private byte inode;
+    private short inode;
     private String name;
 }
