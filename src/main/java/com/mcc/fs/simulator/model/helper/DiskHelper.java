@@ -148,14 +148,17 @@ public class DiskHelper {
      * Creates an instance of a {@link DirectoryBlock} from the given byte array.
      *
      * @param bytes the byte array used to create the directory block.
+     * @param size  the size of the directory block.
      * @return an instance of directory block.
      */
-    public DirectoryBlock byteArrayToDirectoryBlock(byte[] bytes) throws IOException {
+    public DirectoryBlock byteArrayToDirectoryBlock(byte[] bytes, int size) throws IOException {
         DirectoryBlock directoryBlock = new DirectoryBlock();
 
         int offset = 0;
 
-        for (int i = 0; i < DirectoryBlock.NUMBER_OF_ENTRIES; i++) {
+        int numberOfEntries = size / DirectoryEntry.BYTES;
+
+        for (int i = 0; i < numberOfEntries; i++) {
             DirectoryEntry directoryEntry = new DirectoryEntry();
 
             byte[] inodeBytes = new byte[Short.BYTES];

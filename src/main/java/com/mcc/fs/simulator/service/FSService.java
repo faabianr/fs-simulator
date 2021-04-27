@@ -44,15 +44,22 @@ public class FSService {
 
         User rootUser = usersService.getUserByUsername(Constants.DEFAULT_OWNER);
 
-        Inode rootDirectoryInode = Inode.builder()
-                .size(DirectoryBlock.BYTES).type(FileType.DIRECTORY).owner(rootUser).creationDate(new Date()).permissions(Constants.DEFAULT_PERMISSIONS).tableOfContents(tableOfContents).build();
-
         DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) 2).name("..").build();
         DirectoryEntry currentDirectoryEntry = DirectoryEntry.builder().inode((short) 2).name(".").build();
 
         directoryBlock = new DirectoryBlock();
         directoryBlock.addEntry(parentDirectoryEntry);
         directoryBlock.addEntry(currentDirectoryEntry);
+
+        directoryBlock.setContent(diskHelper.directoryBlockToByteArray(directoryBlock));
+
+        Inode rootDirectoryInode = Inode.builder() //
+                .size(directoryBlock.getSize()) //
+                .type(FileType.DIRECTORY) //
+                .owner(rootUser) //
+                .creationDate(new Date()) //
+                .permissions(Constants.DEFAULT_PERMISSIONS) //
+                .tableOfContents(tableOfContents).build();
 
         inodeList.registerInode(rootDirectoryInode, Constants.ROOT_DIRECTORY_INODE);
     }
@@ -158,7 +165,7 @@ public class FSService {
             offset = (long) rootDirectoryBlock * Block.BYTES;
             log.info("Root directory block={}, offset={}", rootDirectoryBlock, offset);
             diskFile.seek(offset);
-            diskFile.write(diskHelper.directoryBlockToByteArray(directoryBlock));
+            diskFile.write(directoryBlock.getContent());
             log.info("root directory content created");
 
         } catch (FileNotFoundException e) {

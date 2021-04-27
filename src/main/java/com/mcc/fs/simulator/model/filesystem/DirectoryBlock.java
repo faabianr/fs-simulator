@@ -8,7 +8,7 @@ import java.util.List;
 @Slf4j
 public class DirectoryBlock extends Block {
 
-    public static final int NUMBER_OF_ENTRIES = 64;
+    public static final int MAX_NUMBER_OF_ENTRIES = 64;
 
     private final List<DirectoryEntry> entries;
 
@@ -22,8 +22,16 @@ public class DirectoryBlock extends Block {
         return entries;
     }
 
-    public void addEntry(DirectoryEntry entry) {
-        entries.add(entry);
+    public int getSize() {
+        return entries.size() * DirectoryEntry.BYTES;
+    }
+
+    public boolean addEntry(DirectoryEntry entry) {
+        if (entries.size() < MAX_NUMBER_OF_ENTRIES) {
+            entries.add(entry);
+            return true;
+        }
+        return false;
     }
 
 }

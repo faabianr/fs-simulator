@@ -10,6 +10,5 @@ public class Main {
         UsersService usersService = new UsersService();
         FSService fsService = new FSService(usersService, new DiskHelper(usersService));
         fsService.writeDiskFile();
-        fsService.readDiskFile();
     }
 }
