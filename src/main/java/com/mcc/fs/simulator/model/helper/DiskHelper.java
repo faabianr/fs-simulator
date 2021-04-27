@@ -120,7 +120,7 @@ public class DiskHelper {
      * @param directoryBlock the directory block to convert to byte array.
      * @return a byte array representing the given input object.
      */
-    public byte[] directoryBlockToByteArray(DirectoryBlock directoryBlock) {
+    public static byte[] directoryBlockToByteArray(DirectoryBlock directoryBlock) {
         byte[] bytes = new byte[DirectoryBlock.BYTES];
 
         ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
@@ -130,6 +130,12 @@ public class DiskHelper {
 
             byte[] nameBytes = new byte[14];
             byte[] originalNameBytes = entry.getName().getBytes(StandardCharsets.UTF_8);
+
+            for (int i = 0; i < nameBytes.length; i++) {
+                if (nameBytes[i] == (byte) 0) {
+                    nameBytes[i] = 32;
+                }
+            }
 
             System.arraycopy(originalNameBytes, 0, nameBytes, 0, originalNameBytes.length);
             byteBuffer.put(nameBytes);
@@ -144,27 +150,35 @@ public class DiskHelper {
      * @param bytes the byte array used to create the directory block.
      * @return an instance of directory block.
      */
-    public DirectoryBlock byteArrayToDirectoryBlock(byte[] bytes) throws IOException {
-        DataInputStream in = new DataInputStream(new ByteArrayInputStream(bytes));
+    public static DirectoryBlock byteArrayToDirectoryBlock(byte[] bytes) throws IOException {
         DirectoryBlock directoryBlock = new DirectoryBlock();
 
         int offset = 0;
+
         for (int i = 0; i < DirectoryBlock.NUMBER_OF_ENTRIES; i++) {
             DirectoryEntry directoryEntry = new DirectoryEntry();
-            directoryEntry.setInode(in.readShort());
-            offset += Short.BYTES;
+
+            byte[] inodeBytes = new byte[Short.BYTES];
             byte[] nameBytes = new byte[14];
 
-            offset += in.read(nameBytes, offset, 14);
-            directoryEntry.setName(new String(nameBytes, StandardCharsets.UTF_8));
+            System.arraycopy(bytes, offset, inodeBytes, 0, inodeBytes.length);
+            System.arraycopy(bytes, offset + 2, nameBytes, 0, nameBytes.length);
+
+            DataInputStream inodeInputStream = new DataInputStream(new ByteArrayInputStream(inodeBytes));
+
+            directoryEntry.setInode(inodeInputStream.readShort());
+            directoryEntry.setName(new String(nameBytes, StandardCharsets.UTF_8).trim());
 
             directoryBlock.addEntry(directoryEntry);
+
+            log.info("new directory entry added={}", directoryEntry);
+
+            offset += DirectoryEntry.BYTES;
         }
 
         return directoryBlock;
     }
 
-    /*
     public static void main(String[] args) throws IOException {
         DirectoryBlock directoryBlock = new DirectoryBlock();
         for (int i = 0; i < 64; i++) {
@@ -179,5 +193,5 @@ public class DiskHelper {
             System.out.println("[entry] inode=" + entry.getInode() + ", name=" + entry.getName());
         }
     }
-*/
+
 }
