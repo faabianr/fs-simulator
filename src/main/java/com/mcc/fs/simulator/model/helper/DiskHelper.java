@@ -120,7 +120,7 @@ public class DiskHelper {
      * @param directoryBlock the directory block to convert to byte array.
      * @return a byte array representing the given input object.
      */
-    public static byte[] directoryBlockToByteArray(DirectoryBlock directoryBlock) {
+    public byte[] directoryBlockToByteArray(DirectoryBlock directoryBlock) {
         byte[] bytes = new byte[DirectoryBlock.BYTES];
 
         ByteBuffer byteBuffer = ByteBuffer.wrap(bytes);
@@ -150,7 +150,7 @@ public class DiskHelper {
      * @param bytes the byte array used to create the directory block.
      * @return an instance of directory block.
      */
-    public static DirectoryBlock byteArrayToDirectoryBlock(byte[] bytes) throws IOException {
+    public DirectoryBlock byteArrayToDirectoryBlock(byte[] bytes) throws IOException {
         DirectoryBlock directoryBlock = new DirectoryBlock();
 
         int offset = 0;
@@ -177,21 +177,6 @@ public class DiskHelper {
         }
 
         return directoryBlock;
-    }
-
-    public static void main(String[] args) throws IOException {
-        DirectoryBlock directoryBlock = new DirectoryBlock();
-        for (int i = 0; i < 64; i++) {
-            DirectoryEntry entry = DirectoryEntry.builder().inode((short) i).name("file " + i).build();
-            directoryBlock.addEntry(entry);
-        }
-
-        byte[] directoryBlockBytes = directoryBlockToByteArray(directoryBlock);
-        DirectoryBlock result = byteArrayToDirectoryBlock(directoryBlockBytes);
-
-        for (DirectoryEntry entry : result.getEntries()) {
-            System.out.println("[entry] inode=" + entry.getInode() + ", name=" + entry.getName());
-        }
     }
 
 }
