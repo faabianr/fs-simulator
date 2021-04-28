@@ -1,6 +1,5 @@
 package com.mcc.fs.simulator.model.filesystem;
 
-import com.sun.javafx.image.impl.ByteRgb;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -22,20 +21,22 @@ public class SuperBlock {
 
     private byte[] LBL; // 256 bloques en 1k
     private byte[] LIL; // 16 numeros de inodos libres
-    private Queue<Byte> LILqueue = new LinkedList<Byte>();
-    private Queue<Byte> LBLqueue = new LinkedList<Byte>();
+    private Queue<Byte> LILqueue;
+    private Queue<Byte> LBLqueue;
     private byte peekLIL;
     private byte peekLBL;
 
     public void init() {
         log.info("Init superblock ...");
+        LILqueue = new LinkedList<>();
+        LBLqueue = new LinkedList<>();
         initLBL();
         initLIL();
     }
 
     private void initLBL() {
         log.info("Initializing LBL ...");
-        
+
         LBL = new byte[Block.BYTES];
         Arrays.fill(LBL, (byte) 0);
         byte startBlock = 9;
@@ -44,7 +45,7 @@ public class SuperBlock {
             LBLqueue.add(LBL[i]);
             startBlock++;
         }
-       
+
     }
 
     private void initLIL() {
@@ -55,9 +56,9 @@ public class SuperBlock {
         for (byte i = 0; i < 16; i++) {
             LIL[i] = startInode;
             LILqueue.add(LIL[i]);
-           startInode++;
-       }
-       
+            startInode++;
+        }
+
     }
 
 }

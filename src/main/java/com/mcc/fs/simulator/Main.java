@@ -10,7 +10,7 @@ public class Main {
         UsersService usersService = new UsersService();
         FSService fsService = new FSService(usersService, new DiskHelper(usersService));
         fsService.writeDiskFile();
-        fsService.CreateDir("mydir");
+        fsService.createDir("mydir");
         String output = fsService.listdir();
         System.out.println(output);
     }
