@@ -46,12 +46,12 @@ public class FSService {
 
         User rootUser = usersService.getUserByUsername(Constants.DEFAULT_OWNER);
 
-        DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) 2).name("..").build();
         DirectoryEntry currentDirectoryEntry = DirectoryEntry.builder().inode((short) 2).name(".").build();
+        DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) 2).name("..").build();
 
         RootDirectoryBlock = new DirectoryBlock();
-        RootDirectoryBlock.addEntry(parentDirectoryEntry);
         RootDirectoryBlock.addEntry(currentDirectoryEntry);
+        RootDirectoryBlock.addEntry(parentDirectoryEntry);
 
         RootDirectoryBlock.setContent(diskHelper.directoryBlockToByteArray(RootDirectoryBlock));
 
