@@ -17,11 +17,9 @@ public class CreateDirectoryCmd extends FSCommand {
     public String execute(FSService fsService, String args) {
         log.info("Executing command: {} with args: {}", getCommand(), args);
         if (args != null && !args.isEmpty()) {
-            fsService.CreateDir(args);
-        }else {
+            return fsService.createDir(args);
+        } else {
             return "Please follow the next form: createdir (dirname)";
         }
-        // TODO implement method logic, this is just a sample return
-        return "directory " + args + " created.\n";
     }
 }
