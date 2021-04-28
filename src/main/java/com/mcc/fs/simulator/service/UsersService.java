@@ -20,6 +20,13 @@ public class UsersService {
         registerUser(Constants.ROOT_USER);
     }
 
+    public User updateUser(User user) {
+        users.remove(user.getId());
+        users.put(user.getId(), user);
+
+        return users.get(user.getId());
+    }
+
     public User getUserById(int userId) {
         return users.get(userId);
     }
@@ -49,6 +56,7 @@ public class UsersService {
 
         User user = User.builder() //
                 .id(userId) //
+                .currentDirectoryInodeNumber(Constants.ROOT_DIRECTORY_INODE) //
                 .username(username) //
                 .build();
 

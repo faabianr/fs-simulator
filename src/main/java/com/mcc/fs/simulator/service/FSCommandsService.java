@@ -4,6 +4,7 @@ import com.mcc.fs.simulator.exception.InvalidCommandException;
 import com.mcc.fs.simulator.model.command.*;
 import com.mcc.fs.simulator.model.network.ExecutionRequest;
 import com.mcc.fs.simulator.model.network.ExecutionResponse;
+import com.mcc.fs.simulator.model.users.User;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 
@@ -19,9 +20,11 @@ public class FSCommandsService {
     private final Map<String, FSCommand> commandsMap;
 
     private final FSService fsService;
+    private final UsersService usersService;
 
-    public FSCommandsService(FSService fsService) {
+    public FSCommandsService(FSService fsService, UsersService usersService) {
         this.fsService = fsService;
+        this.usersService = usersService;
 
         commandsMap = new HashMap<>();
 
@@ -65,7 +68,8 @@ public class FSCommandsService {
 
         // Executing the command
         FSCommand fsCommand = commandsMap.get(command); // getting the command instance to use based on command name
-        String output = fsCommand.execute(fsService, args);
+        User requestUser = usersService.getUserById(executionRequest.getUserId());
+        String output = fsCommand.execute(fsService, args, requestUser);
 
         return ExecutionResponse.builder().output(output).build();
     }

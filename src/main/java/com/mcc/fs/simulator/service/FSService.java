@@ -25,7 +25,6 @@ public class FSService {
     private final UsersService usersService;
     private final DiskHelper diskHelper;
     private DirectoryBlock RootDirectoryBlock;
-    private final int currentDirectoryInodeNumber = Constants.ROOT_DIRECTORY_INODE;
 
     public FSService(UsersService usersService, DiskHelper diskHelper) {
         this.usersService = usersService;
@@ -67,7 +66,9 @@ public class FSService {
         inodeList.registerInode(rootDirectoryInode, Constants.ROOT_DIRECTORY_INODE);
     }
 
-    public String listdir() {
+    public String listdir(String directoryName, User user) {
+        int currentDirectoryInodeNumber = user.getCurrentDirectoryInodeNumber();
+
         StringBuilder output = new StringBuilder();
         Inode currentDirectoryInode = inodeList.getInodeByPosition(currentDirectoryInodeNumber);
         int contentBlock = currentDirectoryInode.getTableOfContents()[0];
@@ -89,8 +90,10 @@ public class FSService {
         return output.toString();
     }
 
-    public String createDir(String dirname) {
+    public String createDir(String dirname, User user) {
         String output;
+
+        int currentDirectoryInodeNumber = user.getCurrentDirectoryInodeNumber();
 
         byte freeInodeNumber = superBlock.getNextFreeInode();
         byte freeBlockNumber = superBlock.getNextFreeBlock();
