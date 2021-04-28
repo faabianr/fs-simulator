@@ -26,7 +26,7 @@ public class FSService {
     private final UsersService usersService;
     private final DiskHelper diskHelper;
     private DirectoryBlock RootDirectoryBlock;
-    private final int currentDirectory = Constants.ROOT_DIRECTORY_INODE;
+    private final int currentDirectoryInodeNumber = Constants.ROOT_DIRECTORY_INODE;
 
     public FSService(UsersService usersService, DiskHelper diskHelper) {
         this.usersService = usersService;
@@ -70,7 +70,6 @@ public class FSService {
 
     public String listdir() {
         StringBuilder output = new StringBuilder();
-        int currentDirectoryInodeNumber = Constants.ROOT_DIRECTORY_INODE;
         Inode currentDirectoryInode = inodeList.getInodeByPosition(currentDirectoryInodeNumber);
         int contentBlock = currentDirectoryInode.getTableOfContents()[0];
         int offset = contentBlock * Block.BYTES;
@@ -103,10 +102,10 @@ public class FSService {
         tableOfContents[0] = blockNumber; // Root directoy starts in 8 and 9 is the first free block
         User rootUser = usersService.getUserByUsername(Constants.DEFAULT_OWNER);
 
-        DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) currentDirectory).name("..").build();
+        DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) currentDirectoryInodeNumber).name("..").build();
         DirectoryEntry newCurrentDirectoryEntry = DirectoryEntry.builder().inode((short) inodeNumber).name(".").build();
 
-        Inode currentDirectoryInode = inodeList.getInodeByPosition(currentDirectory);
+        Inode currentDirectoryInode = inodeList.getInodeByPosition(currentDirectoryInodeNumber);
         int contentBlock = currentDirectoryInode.getTableOfContents()[0]; // Bloque de contenido del padre
         long offset = (long) contentBlock * Block.BYTES;
 
@@ -139,7 +138,7 @@ public class FSService {
             inodeList.registerInode(newDirectoryInode, inodeNumber);
 
             currentDirectoryInode.setSize(currentDirectoryBlock.getSize());
-            inodeList.registerInode(currentDirectoryInode, currentDirectory);
+            inodeList.registerInode(currentDirectoryInode, currentDirectoryInodeNumber);
 
             log.info("Opening disk file in {} mode", FileAccessMode.READ_WRITE);
             diskFile = new RandomAccessFile(Constants.DISK_FILE_PATH, FileAccessMode.READ_WRITE.toString());
