@@ -27,7 +27,7 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 | Boot Block    | It mocks the boot block with a size of 1K. It is located at block #1 |  
 | Super Block   | Contains the LIL and LBL. The size of super block is 2 blocks = 2K |
 | Inodes List   | The inodes list contains all the inodes of the system. It uses 4 blocks of 1K. Each inode uses 64 bytes, given that, each block contains 16 inodes, so in total we have 64 inodes in our system |
-| Data Blocks   | 8th node is not used and 9th is used for root directory, so free blocks start from 10th block.|
+| Data Blocks   | 8th node is used for root directory, so free blocks start from 9th block.|
 
 
 ## Available Commands
