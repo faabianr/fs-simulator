@@ -1,5 +1,6 @@
 package com.mcc.fs.simulator.model.command;
 
+import com.mcc.fs.simulator.model.users.User;
 import com.mcc.fs.simulator.service.FSService;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -11,5 +12,5 @@ public abstract class FSCommand {
     private final String description;
     private final String usage;
 
-    public abstract String execute(FSService fsService, String args);
+    public abstract String execute(FSService fsService, String args, User user);
 }

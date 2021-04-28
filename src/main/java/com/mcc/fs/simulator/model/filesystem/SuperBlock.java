@@ -1,5 +1,7 @@
 package com.mcc.fs.simulator.model.filesystem;
 
+import com.mcc.fs.simulator.exception.NoFreeBlocksException;
+import com.mcc.fs.simulator.exception.NoFreeInodesException;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;
@@ -32,6 +34,22 @@ public class SuperBlock {
         LBLqueue = new LinkedList<>();
         initLBL();
         initLIL();
+    }
+
+    public byte getNextFreeInode() throws NoFreeInodesException {
+        if (LILqueue.isEmpty()) {
+            log.error("the LIL is empty");
+            throw new NoFreeInodesException();
+        }
+        return LILqueue.poll();
+    }
+
+    public byte getNextFreeBlock() throws NoFreeBlocksException {
+        if (LILqueue.isEmpty()) {
+            log.error("the LBL is empty");
+            throw new NoFreeBlocksException();
+        }
+        return LBLqueue.poll();
     }
 
     private void initLBL() {
