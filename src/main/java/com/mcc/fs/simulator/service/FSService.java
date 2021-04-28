@@ -5,12 +5,15 @@ import com.mcc.fs.simulator.model.filesystem.*;
 import com.mcc.fs.simulator.model.helper.DiskHelper;
 import com.mcc.fs.simulator.model.users.User;
 import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.io.FileUtils;
 import org.springframework.stereotype.Service;
 
+import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Date;
+import java.util.Queue;
 
 @Slf4j
 @Service
@@ -22,8 +25,8 @@ public class FSService {
 
     private final UsersService usersService;
     private final DiskHelper diskHelper;
-    private DirectoryBlock directoryBlock;
-
+    private DirectoryBlock RootDirectoryBlock;
+    private int currentDirectory = Constants.ROOT_DIRECTORY_INODE;
     public FSService(UsersService usersService, DiskHelper diskHelper) {
         this.usersService = usersService;
         this.diskHelper = diskHelper;
@@ -40,21 +43,21 @@ public class FSService {
         log.info("Initializing root directory ...");
 
         int[] tableOfContents = new int[11];
-        tableOfContents[0] = 9;
+        tableOfContents[0] = 8; // Root directoy starts in 8 and 9 is the first free block
 
         User rootUser = usersService.getUserByUsername(Constants.DEFAULT_OWNER);
 
         DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) 2).name("..").build();
         DirectoryEntry currentDirectoryEntry = DirectoryEntry.builder().inode((short) 2).name(".").build();
-
-        directoryBlock = new DirectoryBlock();
-        directoryBlock.addEntry(parentDirectoryEntry);
-        directoryBlock.addEntry(currentDirectoryEntry);
-
-        directoryBlock.setContent(diskHelper.directoryBlockToByteArray(directoryBlock));
+    
+        RootDirectoryBlock = new DirectoryBlock();
+        RootDirectoryBlock.addEntry(parentDirectoryEntry);
+        RootDirectoryBlock.addEntry(currentDirectoryEntry);
+    
+        RootDirectoryBlock.setContent(diskHelper.directoryBlockToByteArray(RootDirectoryBlock));
 
         Inode rootDirectoryInode = Inode.builder() //
-                .size(directoryBlock.getSize()) //
+                .size(RootDirectoryBlock.getSize()) //
                 .type(FileType.DIRECTORY) //
                 .owner(rootUser) //
                 .creationDate(new Date()) //
@@ -63,15 +66,112 @@ public class FSService {
 
         inodeList.registerInode(rootDirectoryInode, Constants.ROOT_DIRECTORY_INODE);
     }
-
+    
     public String listdir() {
-        String list = ".<br/>..";
-        return list;
+        StringBuilder output = new StringBuilder();
+        int currentDirectoryInodeNumber = Constants.ROOT_DIRECTORY_INODE;
+        Inode currentDirectoryInode = inodeList.getInodeByPosition(currentDirectoryInodeNumber);
+        int contentBlock = currentDirectoryInode.getTableOfContents()[0];
+        int offset = contentBlock * Block.BYTES;
+        try {
+            byte[] diskFilebytes = FileUtils.readFileToByteArray(new File(Constants.DISK_FILE_PATH));
+            byte[] directoryBlockBytes = new byte[Block.BYTES];
+            
+            System.arraycopy(diskFilebytes, offset, directoryBlockBytes, 0, directoryBlockBytes.length);
+            DirectoryBlock currentDirectoryBlock = diskHelper.byteArrayToDirectoryBlock(
+                    directoryBlockBytes, currentDirectoryInode.getSize()+1);
+            for (DirectoryEntry entry : currentDirectoryBlock.getEntries()) {
+                output.append(entry.getName()).append("<br/>");
+            }
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            output = new StringBuilder("unable to list directory");
+        }
+        return output.toString();
     }
 
-    public String CreateDir() {
-        String created = ".<br/>..";
-        return created;
+    public String CreateDir(String dirname) {
+        String output = "";
+        Queue<Byte> qLIL = superBlock.getLILqueue();
+        int inodeNumber = qLIL.poll();
+        Queue<Byte> qLBL = superBlock.getLBLqueue();
+        int blockNumber = qLBL.poll();
+        
+        DirectoryBlock newDirectoryBlock = new DirectoryBlock();
+        int[] tableOfContents = new int[11];
+        tableOfContents[0] = blockNumber; // Root directoy starts in 8 and 9 is the first free block
+        User rootUser = usersService.getUserByUsername(Constants.DEFAULT_OWNER);
+        
+        DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) currentDirectory).name("..").build();
+        DirectoryEntry newCurrentDirectoryEntry = DirectoryEntry.builder().inode((short) inodeNumber).name(".").build();
+        
+        Inode currentDirectoryInode = inodeList.getInodeByPosition(currentDirectory);
+        int contentBlock = currentDirectoryInode.getTableOfContents()[0]; // Bloque de contenido del padre
+        long offset = (long) contentBlock * Block.BYTES;
+        
+        RandomAccessFile diskFile = null;
+        
+        try {
+            byte[] diskFilebytes = FileUtils.readFileToByteArray(new File(Constants.DISK_FILE_PATH));
+            byte[] directoryBlockBytes = new byte[Block.BYTES];
+    
+            System.arraycopy(diskFilebytes, (int)offset, directoryBlockBytes, 0, directoryBlockBytes.length);
+            DirectoryBlock currentDirectoryBlock = diskHelper.byteArrayToDirectoryBlock(directoryBlockBytes, currentDirectoryInode.getSize());
+            DirectoryEntry newDirectoryEntry = DirectoryEntry.builder().inode((short) inodeNumber).name(dirname).build();
+            currentDirectoryBlock.addEntry(newDirectoryEntry); // Se agrega dir al current
+            
+
+            newDirectoryBlock.addEntry(parentDirectoryEntry);
+            newDirectoryBlock.addEntry(newCurrentDirectoryEntry);
+    
+            newDirectoryBlock.setContent(diskHelper.directoryBlockToByteArray(newDirectoryBlock));
+            currentDirectoryBlock.setContent(diskHelper.directoryBlockToByteArray(currentDirectoryBlock));
+    
+            Inode newDirectoryInode = Inode.builder() //
+                    .size(newDirectoryBlock.getSize()) //
+                    .type(FileType.DIRECTORY) //
+                    .owner(rootUser) //
+                    .creationDate(new Date()) //
+                    .permissions(Constants.DEFAULT_PERMISSIONS) //
+                    .tableOfContents(tableOfContents).build();
+    
+            inodeList.registerInode(newDirectoryInode, inodeNumber);
+            
+            log.info("Opening disk file in {} mode", FileAccessMode.READ_WRITE);
+            diskFile = new RandomAccessFile(Constants.DISK_FILE_PATH, FileAccessMode.READ_WRITE.toString());
+            // writing root directory
+            log.info("Writing inode parent directory into disk file with fd={}", diskFile.getFD().toString());
+            offset = (long) currentDirectoryInode.getTableOfContents()[0] * Block.BYTES;
+            log.info("Root directory block={}, offset={}", currentDirectoryBlock, offset);
+            diskFile.seek(offset);
+            diskFile.write(currentDirectoryBlock.getContent());
+            log.info("root directory content created");
+    
+            // writing new directory
+            log.info("Writing inode parent directory into disk file with fd={}", diskFile.getFD().toString());
+            offset = (long) newDirectoryInode.getTableOfContents()[0] * Block.BYTES;
+            log.info("Root directory block={}, offset={}", currentDirectoryBlock, offset);
+            diskFile.seek(offset);
+            diskFile.write(newDirectoryBlock.getContent());
+            log.info("root directory content created");
+            output = "Directory Created";
+        } catch ( IOException e ) {
+            log.error("Unable to create disk file. Cause: {}", e.getMessage(), e);
+            output = "Unable to create directory";
+            System.exit(1);
+        } finally {
+            if (diskFile != null) {
+                try {
+                    log.info("Closing disk file with fd={}", diskFile.getFD().toString());
+                    diskFile.close();
+                } catch (IOException e) {
+                    log.error("Unable to close diskfile", e);
+                }
+            }
+        }
+        log.info("LBL peek {}:", qLBL.peek());
+        log.info("LIL peek {}:", qLIL.peek());
+        return output;
     }
 
     public String RemoveDir() {
@@ -165,7 +265,7 @@ public class FSService {
             offset = (long) rootDirectoryBlock * Block.BYTES;
             log.info("Root directory block={}, offset={}", rootDirectoryBlock, offset);
             diskFile.seek(offset);
-            diskFile.write(directoryBlock.getContent());
+            diskFile.write(RootDirectoryBlock.getContent());
             log.info("root directory content created");
 
         } catch (FileNotFoundException e) {
