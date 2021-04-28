@@ -3,8 +3,23 @@ $( document ).ready( function() {
     var prompt_id=0;
     var cmdline = 0;
     var responseCmd = 0;
+    var rootUserId = 0;
 
     function init() {
+       var executionRequest = { "username": "root" };
+       $.ajax({
+           url: 'users/login',
+           dataType: 'json',
+           data: JSON.stringify(executionRequest),
+           type : 'POST',
+           contentType: 'application/json',
+           Accept: 'application/json',
+           cache : false,
+           success: function(resultData) {
+            rootUserId = resultData.id;
+           }
+     });
+
       // Init first command line
          $("#cmdline0").keypress(function (ev) {
            var keycode = (ev.keyCode ? ev.keyCode : ev.which);
@@ -57,7 +72,8 @@ $( document ).ready( function() {
       function executeCommand(command){
           var commandResponse = "";
           var executionRequest = {
-               "input": command
+               "input": command,
+               "userId": rootUserId
           };
           $.ajax({
                 url: 'filesystem/commands',
