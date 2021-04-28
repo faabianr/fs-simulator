@@ -11,6 +11,7 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Date;
+import java.util.Queue;
 
 @Slf4j
 @Service
@@ -23,7 +24,7 @@ public class FSService {
     private final UsersService usersService;
     private final DiskHelper diskHelper;
     private DirectoryBlock directoryBlock;
-
+    private int currentDirectory = Constants.ROOT_DIRECTORY_INODE;
     public FSService(UsersService usersService, DiskHelper diskHelper) {
         this.usersService = usersService;
         this.diskHelper = diskHelper;
@@ -34,13 +35,14 @@ public class FSService {
 
         // This will happen only at startup
         writeDiskFile();
+        CreateDir("myDir");
     }
 
     private void initRootDirectory() {
         log.info("Initializing root directory ...");
 
         int[] tableOfContents = new int[11];
-        tableOfContents[0] = 9;
+        tableOfContents[0] = 8; // Root directoy starts in 8 and 9 is the first free block
 
         User rootUser = usersService.getUserByUsername(Constants.DEFAULT_OWNER);
 
@@ -69,9 +71,36 @@ public class FSService {
         return list;
     }
 
-    public String CreateDir() {
-        String created = ".<br/>..";
-        return created;
+    public String CreateDir(String dirname) {
+        Queue<Byte> qLIL = superBlock.getLILqueue();
+        int inodeNumber = qLIL.peek();
+        Queue<Byte> qLBL = superBlock.getLBLqueue();
+        int blockNumber = qLBL.peek();
+        
+        int[] tableOfContents = new int[11];
+        tableOfContents[0] = blockNumber; // Root directoy starts in 8 and 9 is the first free block
+        User rootUser = usersService.getUserByUsername(Constants.DEFAULT_OWNER);
+    
+        DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) inodeNumber).name("..").build();
+        DirectoryEntry currentDirectoryEntry = DirectoryEntry.builder().inode((short) inodeNumber).name(dirname).build();
+    
+        directoryBlock = new DirectoryBlock();
+        directoryBlock.addEntry(parentDirectoryEntry);
+        directoryBlock.addEntry(currentDirectoryEntry);
+    
+        directoryBlock.setContent(diskHelper.directoryBlockToByteArray(directoryBlock));
+    
+        Inode newDirectoryInode = Inode.builder() //
+                .size(directoryBlock.getSize()) //
+                .type(FileType.DIRECTORY) //
+                .owner(rootUser) //
+                .creationDate(new Date()) //
+                .permissions(Constants.DEFAULT_PERMISSIONS) //
+                .tableOfContents(tableOfContents).build();
+    
+        inodeList.registerInode(newDirectoryInode, inodeNumber);
+        
+        return "created";
     }
 
     public String RemoveDir() {
