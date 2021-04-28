@@ -11,6 +11,7 @@ public class Main {
         FSService fsService = new FSService(usersService, new DiskHelper(usersService));
         fsService.writeDiskFile();
         fsService.createDir("mydir");
+        fsService.createDir("testdirectory");
         String output = fsService.listdir();
         System.out.println(output);
     }

@@ -13,7 +13,6 @@ import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
 import java.util.Date;
-import java.util.Queue;
 
 @Slf4j
 @Service
@@ -91,19 +90,18 @@ public class FSService {
     }
 
     public String createDir(String dirname) {
-        String output = "";
-        Queue<Byte> qLIL = superBlock.getLILqueue();
-        int inodeNumber = qLIL.poll();
-        Queue<Byte> qLBL = superBlock.getLBLqueue();
-        int blockNumber = qLBL.poll();
+        String output;
+
+        byte freeInodeNumber = superBlock.getNextFreeInode();
+        byte freeBlockNumber = superBlock.getNextFreeBlock();
 
         DirectoryBlock newDirectoryBlock = new DirectoryBlock();
         int[] tableOfContents = new int[11];
-        tableOfContents[0] = blockNumber; // Root directoy starts in 8 and 9 is the first free block
+        tableOfContents[0] = freeBlockNumber; // Root directoy starts in 8 and 9 is the first free block
         User rootUser = usersService.getUserByUsername(Constants.DEFAULT_OWNER);
 
         DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) currentDirectoryInodeNumber).name("..").build();
-        DirectoryEntry newCurrentDirectoryEntry = DirectoryEntry.builder().inode((short) inodeNumber).name(".").build();
+        DirectoryEntry newCurrentDirectoryEntry = DirectoryEntry.builder().inode(freeInodeNumber).name(".").build();
 
         Inode currentDirectoryInode = inodeList.getInodeByPosition(currentDirectoryInodeNumber);
         int contentBlock = currentDirectoryInode.getTableOfContents()[0]; // Bloque de contenido del padre
@@ -117,9 +115,8 @@ public class FSService {
 
             System.arraycopy(diskFilebytes, (int) offset, directoryBlockBytes, 0, directoryBlockBytes.length);
             DirectoryBlock currentDirectoryBlock = diskHelper.byteArrayToDirectoryBlock(directoryBlockBytes, currentDirectoryInode.getSize());
-            DirectoryEntry newDirectoryEntry = DirectoryEntry.builder().inode((short) inodeNumber).name(dirname).build();
+            DirectoryEntry newDirectoryEntry = DirectoryEntry.builder().inode(freeInodeNumber).name(dirname).build();
             currentDirectoryBlock.addEntry(newDirectoryEntry); // Se agrega dir al current
-
 
             newDirectoryBlock.addEntry(parentDirectoryEntry);
             newDirectoryBlock.addEntry(newCurrentDirectoryEntry);
@@ -135,7 +132,7 @@ public class FSService {
                     .permissions(Constants.DEFAULT_PERMISSIONS) //
                     .tableOfContents(tableOfContents).build();
 
-            inodeList.registerInode(newDirectoryInode, inodeNumber);
+            inodeList.registerInode(newDirectoryInode, freeInodeNumber);
 
             currentDirectoryInode.setSize(currentDirectoryBlock.getSize());
             inodeList.registerInode(currentDirectoryInode, currentDirectoryInodeNumber);
@@ -174,8 +171,9 @@ public class FSService {
                 }
             }
         }
-        log.info("LBL peek {}:", qLBL.peek());
-        log.info("LIL peek {}:", qLIL.peek());
+
+        log.info("LBL peek {}:", superBlock.getLBLqueue().peek());
+        log.info("LIL peek {}:", superBlock.getLILqueue().peek());
 
         return output;
     }

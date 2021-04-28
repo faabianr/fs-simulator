@@ -13,6 +13,7 @@ public class User {
 
     private int id;
     private String username;
+    private int currentDirectoryInodeNumber;
 
     @Override
     public boolean equals(Object o) {
