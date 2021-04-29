@@ -128,7 +128,6 @@ public class FSService {
         DirectoryBlock newDirectoryBlock = new DirectoryBlock();
         int[] tableOfContents = new int[11];
         tableOfContents[0] = freeBlockNumber; // Root directoy starts in 8 and 9 is the first free block
-        User rootUser = usersService.getUserByUsername(Constants.DEFAULT_OWNER);
 
         DirectoryEntry newCurrentDirectoryEntry = DirectoryEntry.builder().inode(freeInodeNumber).name(".").build();
         DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) currentDirectoryInodeNumber).name("..").build();
@@ -157,7 +156,7 @@ public class FSService {
             Inode newDirectoryInode = Inode.builder() //
                     .size(newDirectoryBlock.getSize()) //
                     .type(FileType.DIRECTORY) //
-                    .owner(rootUser) //
+                    .owner(user) //
                     .creationDate(new Date()) //
                     .permissions(Constants.DEFAULT_PERMISSIONS) //
                     .tableOfContents(tableOfContents).build();
