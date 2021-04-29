@@ -153,6 +153,7 @@ public class DiskHelper {
      */
     public DirectoryBlock byteArrayToDirectoryBlock(byte[] bytes, int size) throws IOException {
         DirectoryBlock directoryBlock = new DirectoryBlock();
+        directoryBlock.setContent(bytes);
 
         int offset = 0;
 
@@ -180,6 +181,16 @@ public class DiskHelper {
         }
 
         return directoryBlock;
+    }
+
+    /**
+     * Creates an instance of a {@link Block} from the given byte array.
+     *
+     * @param bytes the byte array used to create the block.
+     * @return an instance of block.
+     */
+    public Block byteArrayToBlock(byte[] bytes) {
+        return Block.builder().content(bytes).build();
     }
 
 }

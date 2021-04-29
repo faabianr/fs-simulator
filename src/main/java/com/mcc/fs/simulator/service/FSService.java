@@ -1,6 +1,7 @@
 package com.mcc.fs.simulator.service;
 
 import com.mcc.fs.simulator.config.Constants;
+import com.mcc.fs.simulator.exception.ReadDiskFileException;
 import com.mcc.fs.simulator.model.filesystem.*;
 import com.mcc.fs.simulator.model.helper.DiskHelper;
 import com.mcc.fs.simulator.model.users.User;
@@ -83,37 +84,78 @@ public class FSService {
         return directoryEntryLineSb.toString();
     }
 
-    public String listdir(String directoryName, User user) {
-        int currentDirectoryInodeNumber = user.getCurrentDirectoryInodeNumber();
+    private Block readContentBlockByInodeNumber(int inodeNumber) {
+        Inode inode = inodeList.getInodeByPosition(inodeNumber);
+        byte[] bytes = readBlockBytesByInode(inode);
 
-        StringBuilder output = new StringBuilder();
-        Inode currentDirectoryInode = inodeList.getInodeByPosition(currentDirectoryInodeNumber);
-        int contentBlock = currentDirectoryInode.getTableOfContents()[0];
-        int offset = contentBlock * Block.BYTES;
+        return diskHelper.byteArrayToBlock(bytes);
+    }
+
+    private DirectoryBlock readDirectoryBlockByInodeNumber(int inodeNumber) {
         try {
-            byte[] diskFilebytes = FileUtils.readFileToByteArray(new File(Constants.DISK_FILE_PATH));
-            byte[] directoryBlockBytes = new byte[Block.BYTES];
+            Inode inode = inodeList.getInodeByPosition(inodeNumber);
+            byte[] bytes = readBlockBytesByInode(inode);
 
-            System.arraycopy(diskFilebytes, offset, directoryBlockBytes, 0, directoryBlockBytes.length);
-            DirectoryBlock currentDirectoryBlock = diskHelper.byteArrayToDirectoryBlock(
-                    directoryBlockBytes, currentDirectoryInode.getSize());
-            for (DirectoryEntry entry : currentDirectoryBlock.getEntries()) {
-
-                Inode entryInode = inodeList.getInodeByPosition(entry.getInode());
-
-                output //
-                        .append(entryInode.getType().toString()).append(" ") //
-                        .append(entryInode.getPermissions().toString()).append(" ") //
-                        .append(entry.getInode()).append(" ") //
-                        .append(entryInode.getOwner().getUsername()).append(" ") //
-                        .append(entryInode.getSize()).append(" ") //
-                        .append(entryInode.getCreationDate()).append(" ") //
-                        .append(entry.getName()).append("<br/>");
-            }
+            return diskHelper.byteArrayToDirectoryBlock(bytes, inode.getSize());
         } catch (IOException e) {
             log.error(e.getMessage(), e);
-            output = new StringBuilder("unable to list directory");
+            throw new ReadDiskFileException();
         }
+    }
+
+    private byte[] readBlockBytesByInode(Inode inode) {
+        int contentBlock = inode.getTableOfContents()[0];
+
+        int offset = contentBlock * Block.BYTES;
+
+        try {
+            byte[] diskFilebytes = FileUtils.readFileToByteArray(new File(Constants.DISK_FILE_PATH));
+            byte[] blockBytes = new byte[Block.BYTES];
+
+            System.arraycopy(diskFilebytes, offset, blockBytes, 0, blockBytes.length);
+
+            return blockBytes;
+        } catch (IOException e) {
+            log.error(e.getMessage(), e);
+            throw new ReadDiskFileException();
+        }
+    }
+
+    public String listdir(String directoryName, User user) {
+        DirectoryBlock directoryBlockToList;
+
+        DirectoryBlock currentDirectoryBlock = readDirectoryBlockByInodeNumber(user.getCurrentDirectoryInodeNumber());
+
+        if (null != directoryName && !directoryName.equals("")) {
+
+            DirectoryEntry targetDirectoryEntry = currentDirectoryBlock.getEntries().stream()
+                    .filter(entry -> entry.getName().equals(directoryName)).findAny().orElse(null);
+
+            if (null != targetDirectoryEntry) {
+                directoryBlockToList = readDirectoryBlockByInodeNumber(targetDirectoryEntry.getInode());
+            } else {
+                return "Directory " + directoryName + " not found.";
+            }
+
+        } else {
+            directoryBlockToList = currentDirectoryBlock;
+        }
+
+        StringBuilder output = new StringBuilder();
+
+        for (DirectoryEntry entry : directoryBlockToList.getEntries()) {
+            Inode entryInode = inodeList.getInodeByPosition(entry.getInode());
+
+            output //
+                    .append(entryInode.getType().toString()).append(" ") //
+                    .append(entryInode.getPermissions().toString()).append(" ") //
+                    .append(entry.getInode()).append(" ") //
+                    .append(entryInode.getOwner().getUsername()).append(" ") //
+                    .append(entryInode.getSize()).append(" ") //
+                    .append(entryInode.getCreationDate()).append(" ") //
+                    .append(entry.getName()).append("<br/>");
+        }
+
         return output.toString();
     }
 
@@ -128,7 +170,6 @@ public class FSService {
         DirectoryBlock newDirectoryBlock = new DirectoryBlock();
         int[] tableOfContents = new int[11];
         tableOfContents[0] = freeBlockNumber; // Root directoy starts in 8 and 9 is the first free block
-        User rootUser = usersService.getUserByUsername(Constants.DEFAULT_OWNER);
 
         DirectoryEntry newCurrentDirectoryEntry = DirectoryEntry.builder().inode(freeInodeNumber).name(".").build();
         DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) currentDirectoryInodeNumber).name("..").build();
@@ -157,7 +198,7 @@ public class FSService {
             Inode newDirectoryInode = Inode.builder() //
                     .size(newDirectoryBlock.getSize()) //
                     .type(FileType.DIRECTORY) //
-                    .owner(rootUser) //
+                    .owner(user) //
                     .creationDate(new Date()) //
                     .permissions(Constants.DEFAULT_PERMISSIONS) //
                     .tableOfContents(tableOfContents).build();
