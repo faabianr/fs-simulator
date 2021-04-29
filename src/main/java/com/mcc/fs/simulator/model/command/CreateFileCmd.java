@@ -19,7 +19,7 @@ public class CreateFileCmd extends FSCommand {
         log.info("Executing command: {} with args: {}", getCommand(), args);
         if (args != null && !args.isEmpty()) {
             String[] argsArray = args.trim().split(" ");
-            return fsService.CreateFile(argsArray[0], argsArray[1], user);
+            return fsService.createFile(argsArray[0], argsArray[1], user);
         } else {
             return "Please follow the next form: createf (filename) (content)";
         }

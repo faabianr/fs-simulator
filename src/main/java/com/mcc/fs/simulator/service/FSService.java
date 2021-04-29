@@ -286,7 +286,7 @@ public class FSService {
         return moveto;
     }
 
-    public String CreateFile(String filename, String content, User user) {
+    public String createFile(String filename, String content, User user) {
         String output;
 
         int currentDirectoryInodeNumber = user.getCurrentDirectoryInodeNumber();

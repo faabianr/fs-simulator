@@ -17,7 +17,7 @@ public class Main {
         fsService.createDir("mydir", user);
         fsService.createDir("testdirectory", user);
         System.out.println(fsService.listDir(null, user));
-        String createOutput = fsService.CreateFile("testfile", "contentdasdsadsa", user);
+        String createOutput = fsService.createFile("testfile", "contentdasdsadsa", user);
         System.out.println("create file: " + createOutput);
         System.out.println(fsService.listDir(null, user));
     }
