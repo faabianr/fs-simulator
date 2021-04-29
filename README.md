@@ -20,6 +20,9 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 * 1 directory entry = 16 bytes (2 bytes: inode number, 14 bytes: name)
 * Given above's point: 1 directory will contain 64 entries
 
+
+![alt text](https://github.com/faabianr/fs-simulator/blob/main/src/main/resources/arquitectura_imagen.png)
+
 ### Main Objects
 
 | Object        | Description  | 
