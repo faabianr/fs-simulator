@@ -20,6 +20,9 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 * 1 directory entry = 16 bytes (2 bytes: inode number, 14 bytes: name)
 * Given above's point: 1 directory will contain 64 entries
 
+
+![alt text](https://github.com/faabianr/fs-simulator/blob/main/src/main/resources/arquitectura_imagen.png)
+
 ### Main Objects
 
 | Object        | Description  | 
@@ -40,8 +43,9 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 | copyf        | Copies a file in directory        | copyf [file name] [directory]   |
 | copydir      | Copies a directory in directory   | copydir [dir name] [directory]  |
 | listdir      | Displays directory's content      | listdir                         |
-| showf        | Displays file's content           | showf [file_name]                         |
-
+| showf        | Displays file's content           | showf [file_name]               |
+| gotodir      | Move to the directory indicated   | gotodir [dir_name]              |
+| clear        | Clear the terminal                | clear                           |
 
 
 ## Algorithms
@@ -55,11 +59,12 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 ![alt_text](https://www.websequencediagrams.com/files/render?link=zjygWzUMB7s84nlcmZiW1oZwdmVyAQHCtUAoMyKzYixE5STAIl0f1XWqjia4cKJP)
 ### ListDir command
 ![alt_text](https://www.websequencediagrams.com/files/render?link=Disaw4xD5j9IpEddtja9N0pnvXW5SVQZPzCIvwWOC4swrKcULMH7AfWo7TNE4MLH)
-## Copyf or copydir command
+### Copyf or copydir command
 ![alt_text](https://www.websequencediagrams.com/files/render?link=MpoNFVOFdc3lQx9VA1EDy5EmyegoarR7N5oji2PpgujA4Y3cHDPlAQoajH6VhqE8)
-## Showf command
-![alt_text](https://www.websequencediagrams.com/files/render?link=GJbYXJQ1fBJgdgSs4rROz1o7hIYNNm9CifkdUIFaXgb1ms5XIQe5PVjS8Aqv5EAM)
-
+### Showf command
+![alt_text](https://www.websequencediagrams.com/files/render?link=lM7IuFOQKPPie3LsWoqS9Dqi9rU8q8DgzqJnh0OM03X3l3wGVgHyl50zLXAMSZ8g)
+### Gotodir command
+![alt_text](https://www.websequencediagrams.com/files/render?link=EHBvCrkhG3cDNrgbFPlljiOdZLfR52sm8OvzjB3KYbvomEL1JOFnkv4JZhm5K4Of)
 ## Contributors
 * Mariam Castañeda
 * Fabián Rivera
