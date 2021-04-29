@@ -60,7 +60,7 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 ## Showf command
 ![alt_text](https://www.websequencediagrams.com/files/render?link=lM7IuFOQKPPie3LsWoqS9Dqi9rU8q8DgzqJnh0OM03X3l3wGVgHyl50zLXAMSZ8g)
 ## Gotodir command
-![alt_text]()
+![alt_text](https://www.websequencediagrams.com/files/render?link=EHBvCrkhG3cDNrgbFPlljiOdZLfR52sm8OvzjB3KYbvomEL1JOFnkv4JZhm5K4Of)
 ## Contributors
 * Mariam Castañeda
 * Fabián Rivera
