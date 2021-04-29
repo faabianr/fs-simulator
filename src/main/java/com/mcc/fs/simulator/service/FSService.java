@@ -286,6 +286,25 @@ public class FSService {
         return moveto;
     }
 
+    public String showFile(String filename, User user) {
+        DirectoryBlock currentDirectoryBlock = readDirectoryBlockByInodeNumber(user.getCurrentDirectoryInodeNumber());
+
+        DirectoryEntry fileEntry = currentDirectoryBlock.getEntries().stream()
+                .filter(entry -> entry.getName().equals(filename)).findAny().orElse(null);
+
+        Block fileBlock;
+        Inode fileInode;
+
+        if (null != fileEntry) {
+            fileInode = inodeList.getInodeByPosition(fileEntry.getInode());
+            fileBlock = readContentBlockByInodeNumber(fileEntry.getInode());
+        } else {
+            return "File " + filename + " not found.";
+        }
+
+        return diskHelper.blockContentToString(fileBlock, fileInode.getSize());
+    }
+
     public String createFile(String filename, String content, User user) {
         String output;
 

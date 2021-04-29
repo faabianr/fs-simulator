@@ -90,10 +90,13 @@ public class DiskHelper {
      * Returns the {@link String} value of a block's content.
      *
      * @param block the block that will be read and converted into string.
+     * @param size  the content size.
      * @return an string representing the block's content.
      */
-    public String blockContentToString(Block block) {
-        return new String(block.getContent(), StandardCharsets.UTF_8);
+    public String blockContentToString(Block block, int size) {
+        byte[] realContentBytes = new byte[size];
+        System.arraycopy(block.getContent(), 0, realContentBytes, 0, realContentBytes.length);
+        return new String(realContentBytes, StandardCharsets.UTF_8);
     }
 
     /**

@@ -20,6 +20,7 @@ public class Main {
         String createOutput = fsService.createFile("testfile", "contentdasdsadsa", user);
         System.out.println("create file: " + createOutput);
         System.out.println(fsService.listDir(null, user));
+        System.out.println("content of file: " + fsService.showFile("testfile", user));
     }
 
 }
