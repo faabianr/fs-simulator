@@ -18,11 +18,10 @@ public class MoveFileCmd extends FSCommand {
     public String execute(FSService fsService, String args, User user) {
         log.info("Executing command: {} with args: {}", getCommand(), args);
         if (args != null && !args.isEmpty()) {
-            fsService.MoveFile();
+            String[] argsArray = args.trim().split(" ");
+            return fsService.moveFile(argsArray[0], argsArray[1], user);
         } else {
             return "Please follow the next form: movef (filename) (newlocation)";
         }
-        // TODO implement method logic, this is just a sample return
-        return "file " + args + " moved.\n";
     }
 }

@@ -4,13 +4,14 @@ import lombok.extern.slf4j.Slf4j;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Slf4j
 public class DirectoryBlock extends Block {
 
     public static final int MAX_NUMBER_OF_ENTRIES = 64;
 
-    private final List<DirectoryEntry> entries;
+    private List<DirectoryEntry> entries;
 
     public DirectoryBlock() {
         // 1 directory contains 64 entries
@@ -24,6 +25,12 @@ public class DirectoryBlock extends Block {
 
     public int getSize() {
         return entries.size() * DirectoryEntry.BYTES;
+    }
+
+    public void removeEntry(DirectoryEntry directoryEntry) {
+        entries = entries.stream()
+                .filter(entry -> entry.getInode() != directoryEntry.getInode())
+                .collect(Collectors.toList());
     }
 
     public boolean addEntry(DirectoryEntry entry) {

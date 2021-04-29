@@ -394,14 +394,215 @@ public class FSService {
         return revomed;
     }
 
-    public String MoveFile() {
-        String movef = ".<br/>..";
-        return movef;
+    public String moveFile(String filename, String targetDirectory, User user) {
+        String output;
+
+        // finding the file to move
+        DirectoryBlock currentDirectoryBlock = readDirectoryBlockByInodeNumber(user.getCurrentDirectoryInodeNumber());
+        DirectoryEntry fileEntry = currentDirectoryBlock.getEntries().stream()
+                .filter(entry -> entry.getName().equals(filename)).findAny().orElse(null);
+
+        if (null == fileEntry) {
+            return "file " + filename + " does not exist";
+        }
+
+        // finding the target directory
+        DirectoryEntry targetDirectoryEntry = currentDirectoryBlock.getEntries().stream()
+                .filter(entry -> entry.getName().equals(targetDirectory)).findAny().orElse(null);
+
+        if (null == targetDirectoryEntry) {
+            return "target directory not found";
+        }
+
+        Inode targetDirectoryInode = inodeList.getInodeByPosition(targetDirectoryEntry.getInode());
+
+        if (targetDirectoryInode.getType() != FileType.DIRECTORY) {
+            return "target must be a directory";
+        }
+
+        DirectoryBlock targetDirectoryBlock = readDirectoryBlockByInodeNumber(targetDirectoryEntry.getInode());
+
+        // remove the entry from current directory and add it to the target directory block
+        currentDirectoryBlock.removeEntry(fileEntry);
+        currentDirectoryBlock.setContent(diskHelper.directoryBlockToByteArray(currentDirectoryBlock));
+
+        // add the entry to target directory, if target directory does not exist return an error message
+        targetDirectoryBlock.addEntry(fileEntry);
+        targetDirectoryBlock.setContent(diskHelper.directoryBlockToByteArray(targetDirectoryBlock));
+
+        // update inodes
+        Inode currentDirectoryInode = inodeList.getInodeByPosition(user.getCurrentDirectoryInodeNumber());
+        targetDirectoryInode.setSize(targetDirectoryBlock.getSize());
+        currentDirectoryInode.setSize(currentDirectoryBlock.getSize());
+
+        inodeList.registerInode(targetDirectoryInode, targetDirectoryEntry.getInode());
+        inodeList.registerInode(currentDirectoryInode, user.getCurrentDirectoryInodeNumber());
+
+        // writing blocks to disk
+
+        RandomAccessFile diskFile = null;
+        long offset;
+
+        try {
+            log.info("Opening disk file in {} mode", FileAccessMode.READ_WRITE);
+            diskFile = new RandomAccessFile(Constants.DISK_FILE_PATH, FileAccessMode.READ_WRITE.toString());
+
+            // writing current directory
+            log.info("writing current directory into disk file with fd={}", diskFile.getFD().toString());
+            offset = (long) currentDirectoryInode.getTableOfContents()[0] * Block.BYTES;
+            log.info("current directory block={}, offset={}", currentDirectoryBlock, offset);
+            diskFile.seek(offset);
+            diskFile.write(currentDirectoryBlock.getContent());
+            log.info("current directory content written");
+
+            // writing target directory
+            log.info("writing target directory into disk file with fd={}", diskFile.getFD().toString());
+            offset = (long) targetDirectoryInode.getTableOfContents()[0] * Block.BYTES;
+            log.info("target directory block={}, offset={}", targetDirectoryBlock, offset);
+            diskFile.seek(offset);
+            diskFile.write(targetDirectoryBlock.getContent());
+            log.info("target directory content written");
+
+            // writing new file
+            Inode newFileInode = inodeList.getInodeByPosition(fileEntry.getInode());
+            Block srcBlock = readContentBlockByInodeNumber(fileEntry.getInode()); // this is the content block to be copied
+            log.info("writing new copied into disk file with fd={}", diskFile.getFD().toString());
+            offset = (long) newFileInode.getTableOfContents()[0] * Block.BYTES;
+            log.info("new file block={}, offset={}", srcBlock.getContent(), offset);
+            diskFile.seek(offset);
+            diskFile.write(srcBlock.getContent());
+            log.info("new file {} copied into {}", filename, targetDirectory);
+
+            output = "File " + filename + " moved to " + targetDirectory;
+        } catch (IOException e) {
+            log.error("Unable to create disk file. Cause: {}", e.getMessage(), e);
+            output = "Unable to create directory";
+            System.exit(1);
+        } finally {
+            if (diskFile != null) {
+                try {
+                    log.info("Closing disk file with fd={}", diskFile.getFD().toString());
+                    diskFile.close();
+                } catch (IOException e) {
+                    log.error("Unable to close diskfile", e);
+                }
+            }
+        }
+
+        log.info("LBL peek {}:", superBlock.getLBLqueue().peek());
+        log.info("LIL peek {}:", superBlock.getLILqueue().peek());
+
+        return output;
     }
 
-    public String CopyFile() {
-        String copyf = ".<br/>..";
-        return copyf;
+    public String copyFile(String filename, String targetDirectory, User user) {
+        String output;
+
+        // finding the file to copy
+        DirectoryBlock currentDirectoryBlock = readDirectoryBlockByInodeNumber(user.getCurrentDirectoryInodeNumber());
+        DirectoryEntry originalFileEntry = currentDirectoryBlock.getEntries().stream()
+                .filter(entry -> entry.getName().equals(filename)).findAny().orElse(null);
+
+        if (null == originalFileEntry) {
+            return "file " + filename + " does not exist";
+        }
+
+        // finding the target directory
+        DirectoryEntry targetDirectoryEntry = currentDirectoryBlock.getEntries().stream()
+                .filter(entry -> entry.getName().equals(targetDirectory)).findAny().orElse(null);
+
+        if (null == targetDirectoryEntry) {
+            return "target directory not found";
+        }
+
+        Inode targetDirectoryInode = inodeList.getInodeByPosition(targetDirectoryEntry.getInode());
+
+        if (targetDirectoryInode.getType() != FileType.DIRECTORY) {
+            return "target must be a directory";
+        }
+
+        DirectoryBlock targetDirectoryBlock = readDirectoryBlockByInodeNumber(targetDirectoryEntry.getInode());
+
+        // create a new Entry since we need a new inode number and free block number for the copy
+        byte freeInode = superBlock.getNextFreeInode();
+        byte freeBlock = superBlock.getNextFreeBlock();
+
+        Inode originalFileInode = inodeList.getInodeByPosition(originalFileEntry.getInode());
+
+        int[] newFileTableOfContents = new int[11];
+        newFileTableOfContents[0] = freeBlock;
+
+        Inode newFileInode = Inode.builder() //
+                .size(originalFileInode.getSize()) //
+                .type(originalFileInode.getType()) //
+                .owner(user) //
+                .creationDate(new Date()) //
+                .permissions(originalFileInode.getPermissions()) //
+                .tableOfContents(newFileTableOfContents).build();
+
+        Block newFileBlock = readContentBlockByInodeNumber(originalFileEntry.getInode()); // this is the content block to be copied
+
+        DirectoryEntry newFileEntry = DirectoryEntry.builder()
+                .inode(freeInode)
+                .name(originalFileEntry.getName())
+                .build();
+
+        // add the entry to target directory, if target directory does not exist return an error message
+        targetDirectoryBlock.addEntry(newFileEntry);
+        targetDirectoryBlock.setContent(diskHelper.directoryBlockToByteArray(targetDirectoryBlock));
+
+        // update target directory inode
+        targetDirectoryInode.setSize(targetDirectoryBlock.getSize());
+        inodeList.registerInode(targetDirectoryInode, targetDirectoryEntry.getInode());
+
+        // register new file inode
+        inodeList.registerInode(newFileInode, freeInode);
+
+        // writing blocks to disk
+
+        RandomAccessFile diskFile = null;
+        long offset;
+
+        try {
+            log.info("Opening disk file in {} mode", FileAccessMode.READ_WRITE);
+            diskFile = new RandomAccessFile(Constants.DISK_FILE_PATH, FileAccessMode.READ_WRITE.toString());
+
+            // writing new file
+            log.info("writing new copied into disk file with fd={}", diskFile.getFD().toString());
+            offset = (long) newFileInode.getTableOfContents()[0] * Block.BYTES;
+            log.info("new file block={}, offset={}", newFileBlock.getContent(), offset);
+            diskFile.seek(offset);
+            diskFile.write(newFileBlock.getContent());
+            log.info("new file {} copied into {}", filename, targetDirectory);
+
+            // writing target directory block
+            log.info("writing target directory into disk file with fd={}", diskFile.getFD().toString());
+            offset = (long) targetDirectoryInode.getTableOfContents()[0] * Block.BYTES;
+            log.info("target directory block={}, offset={}", targetDirectoryBlock, offset);
+            diskFile.seek(offset);
+            diskFile.write(targetDirectoryBlock.getContent());
+            log.info("target directory content written");
+
+            output = "File " + filename + " copied to " + targetDirectory;
+        } catch (IOException e) {
+            log.error("Unable to create disk file. Cause: {}", e.getMessage(), e);
+            output = "Unable to create directory";
+            System.exit(1);
+        } finally {
+            if (diskFile != null) {
+                try {
+                    log.info("Closing disk file with fd={}", diskFile.getFD().toString());
+                    diskFile.close();
+                } catch (IOException e) {
+                    log.error("Unable to close diskfile", e);
+                }
+            }
+        }
+
+        log.info("LBL peek {}:", superBlock.getLBLqueue().peek());
+        log.info("LIL peek {}:", superBlock.getLILqueue().peek());
+
+        return output;
     }
 
     public void writeDiskFile() {

@@ -21,6 +21,8 @@ public class Main {
         System.out.println("create file: " + createOutput);
         System.out.println(fsService.listDir(null, user));
         System.out.println("content of file: " + fsService.showFile("testfile", user));
+        fsService.copyFile("testfile", "testdirectory", user);
+        System.out.println(fsService.listDir("testdirectory", user));
     }
 
 }
