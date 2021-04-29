@@ -18,11 +18,9 @@ public class RemoveFileCmd extends FSCommand {
     public String execute(FSService fsService, String args, User user) {
         log.info("Executing command: {} with args: {}", getCommand(), args);
         if (args != null && !args.isEmpty()) {
-            fsService.RemoveFile();
+            return fsService.removeFile(args.trim(), user);
         } else {
             return "Please follow the next form: removef (filename)";
         }
-        // TODO implement method logic, this is just a sample return
-        return "file " + args + " removed.\n";
     }
 }

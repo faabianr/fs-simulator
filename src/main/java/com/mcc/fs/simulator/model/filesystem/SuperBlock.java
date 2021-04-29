@@ -45,11 +45,21 @@ public class SuperBlock {
     }
 
     public byte getNextFreeBlock() throws NoFreeBlocksException {
-        if (LILqueue.isEmpty()) {
+        if (LBLqueue.isEmpty()) {
             log.error("the LBL is empty");
             throw new NoFreeBlocksException();
         }
         return LBLqueue.poll();
+    }
+
+    public void registerFreeInode(byte inode) {
+        log.info("added free inode={} to LIL", inode);
+        LILqueue.add(inode);
+    }
+
+    public void registerFreeBlock(byte block) {
+        log.info("added free block={} to LIL", block);
+        LBLqueue.add(block);
     }
 
     private void initLBL() {

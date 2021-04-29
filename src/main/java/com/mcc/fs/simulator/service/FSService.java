@@ -389,9 +389,89 @@ public class FSService {
         return output;
     }
 
-    public String RemoveFile() {
-        String revomed = ".<br/>..";
-        return revomed;
+    public String removeFile(String filename, User user) {
+        String output;
+
+        // finding the file to remove
+        Inode currentDirectoryInode = inodeList.getInodeByPosition(user.getCurrentDirectoryInodeNumber());
+        DirectoryBlock currentDirectoryBlock = readDirectoryBlockByInodeNumber(user.getCurrentDirectoryInodeNumber());
+        DirectoryEntry fileEntry = currentDirectoryBlock.getEntries().stream()
+                .filter(entry -> entry.getName().equals(filename)).findAny().orElse(null);
+
+        if (null == fileEntry) {
+            return "file " + filename + " does not exist";
+        }
+
+        // reset inode, set back to the queue the block and inodes
+
+        Inode fileInodeToRemove = inodeList.getInodeByPosition(fileEntry.getInode());
+
+        int blockNumberToRemove = fileInodeToRemove.getTableOfContents()[0];
+        int inodeNumberToRemove = fileEntry.getInode();
+
+        fileInodeToRemove.setSize(0);
+        fileInodeToRemove.setType(FileType.FREE_INODE);
+        fileInodeToRemove.setOwner(usersService.getUserByUsername(Constants.DEFAULT_OWNER));
+        fileInodeToRemove.setCreationDate(new Date());
+        fileInodeToRemove.setPermissions(Constants.DEFAULT_PERMISSIONS);
+        fileInodeToRemove.setTableOfContents(new int[11]);
+
+        inodeList.registerInode(fileInodeToRemove, inodeNumberToRemove);
+
+        superBlock.registerFreeInode((byte) inodeNumberToRemove);
+        superBlock.registerFreeBlock((byte) blockNumberToRemove);
+
+        currentDirectoryBlock.removeEntry(fileEntry);
+        currentDirectoryBlock.setContent(diskHelper.directoryBlockToByteArray(currentDirectoryBlock));
+        currentDirectoryInode.setSize(currentDirectoryBlock.getSize());
+
+        inodeList.registerInode(currentDirectoryInode, user.getCurrentDirectoryInodeNumber());
+
+        // writing blocks to disk
+
+        RandomAccessFile diskFile = null;
+        long offset;
+
+        try {
+            log.info("Opening disk file in {} mode", FileAccessMode.READ_WRITE);
+            diskFile = new RandomAccessFile(Constants.DISK_FILE_PATH, FileAccessMode.READ_WRITE.toString());
+
+            // writing current directory
+            log.info("writing current directory into disk file with fd={}", diskFile.getFD().toString());
+            offset = (long) currentDirectoryInode.getTableOfContents()[0] * Block.BYTES;
+            log.info("current directory block={}, offset={}", currentDirectoryBlock, offset);
+            diskFile.seek(offset);
+            diskFile.write(currentDirectoryBlock.getContent());
+            log.info("current directory content written");
+
+            // reseting block of removed file
+            Block srcBlock = readContentBlockByInodeNumber(inodeNumberToRemove);
+            srcBlock.setContent(new byte[Block.BYTES]);
+            log.info("reseting file to remove into disk file with fd={}", diskFile.getFD().toString());
+            offset = (long) fileInodeToRemove.getTableOfContents()[0] * Block.BYTES;
+            log.info("file to remove block={}, offset={}", srcBlock.getContent(), offset);
+            diskFile.seek(offset);
+            diskFile.write(srcBlock.getContent());
+
+            output = "File " + filename + " removed";
+        } catch (IOException e) {
+            log.error("Unable to create disk file. Cause: {}", e.getMessage(), e);
+            output = "Unable to create directory";
+        } finally {
+            if (diskFile != null) {
+                try {
+                    log.info("Closing disk file with fd={}", diskFile.getFD().toString());
+                    diskFile.close();
+                } catch (IOException e) {
+                    log.error("Unable to close diskfile", e);
+                }
+            }
+        }
+
+        log.info("LBL peek {}:", superBlock.getLBLqueue().peek());
+        log.info("LIL peek {}:", superBlock.getLILqueue().peek());
+
+        return output;
     }
 
     public String moveFile(String filename, String targetDirectory, User user) {
