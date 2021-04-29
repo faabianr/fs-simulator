@@ -16,8 +16,10 @@ public class Main {
         fsService.writeDiskFile();
         fsService.createDir("mydir", user);
         fsService.createDir("testdirectory", user);
-        String output = fsService.listDir("mydir", user);
-        System.out.println(output);
+        System.out.println(fsService.listDir(null, user));
+        String createOutput = fsService.CreateFile("testfile", "contentdasdsadsa", user);
+        System.out.println("create file: " + createOutput);
+        System.out.println(fsService.listDir(null, user));
     }
 
 }

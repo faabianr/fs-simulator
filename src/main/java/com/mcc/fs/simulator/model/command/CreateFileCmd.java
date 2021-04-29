@@ -18,11 +18,10 @@ public class CreateFileCmd extends FSCommand {
     public String execute(FSService fsService, String args, User user) {
         log.info("Executing command: {} with args: {}", getCommand(), args);
         if (args != null && !args.isEmpty()) {
-            fsService.CreateFile();
+            String[] argsArray = args.trim().split(" ");
+            return fsService.CreateFile(argsArray[0], argsArray[1], user);
         } else {
-            return "Please follow the next form: createf (filename)";
+            return "Please follow the next form: createf (filename) (content)";
         }
-        // TODO implement method logic, this is just a sample return
-        return "File" + args + " created.\n";
     }
 }

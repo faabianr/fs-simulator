@@ -13,6 +13,7 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.nio.charset.StandardCharsets;
 import java.util.Date;
 
 @Slf4j
@@ -285,9 +286,88 @@ public class FSService {
         return moveto;
     }
 
-    public String CreateFile() {
-        String craetef = ".<br/>..";
-        return craetef;
+    public String CreateFile(String filename, String content, User user) {
+        String output;
+
+        int currentDirectoryInodeNumber = user.getCurrentDirectoryInodeNumber();
+
+        byte freeInodeNumber = superBlock.getNextFreeInode();
+        byte freeBlockNumber = superBlock.getNextFreeBlock();
+
+        Inode currentDirectoryInode = inodeList.getInodeByPosition(currentDirectoryInodeNumber);
+        int contentBlock = currentDirectoryInode.getTableOfContents()[0]; // Bloque de contenido del padre
+        long offset = (long) contentBlock * Block.BYTES;
+
+        RandomAccessFile diskFile = null;
+
+        try {
+            byte[] diskFilebytes = FileUtils.readFileToByteArray(new File(Constants.DISK_FILE_PATH));
+            byte[] directoryBlockBytes = new byte[Block.BYTES];
+
+            System.arraycopy(diskFilebytes, (int) offset, directoryBlockBytes, 0, directoryBlockBytes.length);
+            DirectoryBlock currentDirectoryBlock = diskHelper.byteArrayToDirectoryBlock(directoryBlockBytes, currentDirectoryInode.getSize());
+
+            DirectoryEntry newFileEntry = DirectoryEntry.builder().inode(freeInodeNumber).name(filename).build();
+            currentDirectoryBlock.addEntry(newFileEntry);
+
+            Block newFileBlock = diskHelper.contentToBlock(content);
+            currentDirectoryBlock.setContent(diskHelper.directoryBlockToByteArray(currentDirectoryBlock));
+
+            int[] tableOfContents = new int[11];
+            tableOfContents[0] = freeBlockNumber;
+
+            Inode newFileInode = Inode.builder() //
+                    .size(content.getBytes(StandardCharsets.UTF_8).length) //
+                    .type(FileType.REGULAR_FILE) //
+                    .owner(user) //
+                    .creationDate(new Date()) //
+                    .permissions(Constants.DEFAULT_PERMISSIONS) //
+                    .tableOfContents(tableOfContents).build();
+
+            inodeList.registerInode(newFileInode, freeInodeNumber);
+
+            currentDirectoryInode.setSize(currentDirectoryBlock.getSize());
+            inodeList.registerInode(currentDirectoryInode, currentDirectoryInodeNumber);
+
+            log.info("Opening disk file in {} mode", FileAccessMode.READ_WRITE);
+            diskFile = new RandomAccessFile(Constants.DISK_FILE_PATH, FileAccessMode.READ_WRITE.toString());
+
+            // writing parent directory
+            log.info("writing inode parent directory into disk file with fd={}", diskFile.getFD().toString());
+            offset = (long) currentDirectoryInode.getTableOfContents()[0] * Block.BYTES;
+            log.info("parent directory block={}, offset={}", currentDirectoryBlock, offset);
+            diskFile.seek(offset);
+            diskFile.write(currentDirectoryBlock.getContent());
+            log.info("root directory content created");
+
+            // writing new file
+            log.info("writing new file into disk file with fd={}", diskFile.getFD().toString());
+            offset = (long) newFileInode.getTableOfContents()[0] * Block.BYTES;
+            log.info("new file block={}, offset={}", newFileBlock.getContent(), offset);
+            diskFile.seek(offset);
+            diskFile.write(newFileBlock.getContent());
+            log.info("new file {} created", filename);
+
+            output = "File " + filename + " Created";
+        } catch (IOException e) {
+            log.error("Unable to create disk file. Cause: {}", e.getMessage(), e);
+            output = "Unable to create directory";
+            System.exit(1);
+        } finally {
+            if (diskFile != null) {
+                try {
+                    log.info("Closing disk file with fd={}", diskFile.getFD().toString());
+                    diskFile.close();
+                } catch (IOException e) {
+                    log.error("Unable to close diskfile", e);
+                }
+            }
+        }
+
+        log.info("LBL peek {}:", superBlock.getLBLqueue().peek());
+        log.info("LIL peek {}:", superBlock.getLILqueue().peek());
+
+        return output;
     }
 
     public String RemoveFile() {
