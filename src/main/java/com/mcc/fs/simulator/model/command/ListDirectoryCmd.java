@@ -17,7 +17,7 @@ public class ListDirectoryCmd extends FSCommand {
     @Override
     public String execute(FSService fsService, String args, User user) {
         log.info("Executing command: {} with args: {}", getCommand(), args);
-        return fsService.listdir(args.trim(), user);
+        return fsService.listDir(args.trim(), user);
     }
 
 }

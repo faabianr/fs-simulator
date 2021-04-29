@@ -16,7 +16,7 @@ public class Main {
         fsService.writeDiskFile();
         fsService.createDir("mydir", user);
         fsService.createDir("testdirectory", user);
-        String output = fsService.listdir("mydir", user);
+        String output = fsService.listDir("mydir", user);
         System.out.println(output);
     }
 

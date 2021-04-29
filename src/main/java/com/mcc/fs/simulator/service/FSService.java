@@ -43,7 +43,7 @@ public class FSService {
         log.info("Initializing root directory ...");
 
         int[] tableOfContents = new int[11];
-        tableOfContents[0] = 8; // Root directoy starts in 8 and 9 is the first free block
+        tableOfContents[0] = 8; // Root directory starts in 8 and 9 is the first free block
 
         User rootUser = usersService.getUserByUsername(Constants.DEFAULT_OWNER);
 
@@ -121,7 +121,33 @@ public class FSService {
         }
     }
 
-    public String listdir(String directoryName, User user) {
+    public String goToDir(String directoryName, User user) {
+        String output;
+
+        DirectoryBlock currentDirectoryBlock = readDirectoryBlockByInodeNumber(user.getCurrentDirectoryInodeNumber());
+
+        if (null != directoryName && !directoryName.equals("")) {
+
+            DirectoryEntry targetDirectoryEntry = currentDirectoryBlock.getEntries().stream()
+                    .filter(entry -> entry.getName().equals(directoryName)).findAny().orElse(null);
+
+            if (null != targetDirectoryEntry) {
+                user.setCurrentDirectoryInodeNumber(targetDirectoryEntry.getInode());
+                usersService.updateUser(user);
+
+                return "Moved to directory " + targetDirectoryEntry.getName();
+            } else {
+                return "Directory " + directoryName + " not found.";
+            }
+
+        } else {
+            output = "specify a valid directory";
+        }
+
+        return output;
+    }
+
+    public String listDir(String directoryName, User user) {
         DirectoryBlock directoryBlockToList;
 
         DirectoryBlock currentDirectoryBlock = readDirectoryBlockByInodeNumber(user.getCurrentDirectoryInodeNumber());

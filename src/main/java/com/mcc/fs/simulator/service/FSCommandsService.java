@@ -37,6 +37,7 @@ public class FSCommandsService {
         registerCommand(new RemoveFileCmd());
         registerCommand(new MoveFileCmd());
         registerCommand(new CopyFileCmd());
+        registerCommand(new GoToDirectoryCmd());
     }
 
     private void registerCommand(FSCommand fsCommand) {
