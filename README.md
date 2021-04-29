@@ -42,7 +42,7 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 | listdir      | Displays directory's content      | listdir                         |
 | showf        | Displays file's content           | showf [file_name]               |
 | gotodir      | Move to the directory indicated   | gotodir [dir_name]              |
-
+| clear        | Clear the terminal                | clear                           |
 
 
 ## Algorithms
@@ -56,11 +56,11 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 ![alt_text](https://www.websequencediagrams.com/files/render?link=zjygWzUMB7s84nlcmZiW1oZwdmVyAQHCtUAoMyKzYixE5STAIl0f1XWqjia4cKJP)
 ### ListDir command
 ![alt_text](https://www.websequencediagrams.com/files/render?link=Disaw4xD5j9IpEddtja9N0pnvXW5SVQZPzCIvwWOC4swrKcULMH7AfWo7TNE4MLH)
-## Copyf or copydir command
+### Copyf or copydir command
 ![alt_text](https://www.websequencediagrams.com/files/render?link=MpoNFVOFdc3lQx9VA1EDy5EmyegoarR7N5oji2PpgujA4Y3cHDPlAQoajH6VhqE8)
-## Showf command
+### Showf command
 ![alt_text](https://www.websequencediagrams.com/files/render?link=lM7IuFOQKPPie3LsWoqS9Dqi9rU8q8DgzqJnh0OM03X3l3wGVgHyl50zLXAMSZ8g)
-## Gotodir command
+### Gotodir command
 ![alt_text](https://www.websequencediagrams.com/files/render?link=EHBvCrkhG3cDNrgbFPlljiOdZLfR52sm8OvzjB3KYbvomEL1JOFnkv4JZhm5K4Of)
 ## Contributors
 * Mariam Castañeda
