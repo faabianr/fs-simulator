@@ -192,7 +192,7 @@ public class FSService {
         return output.toString();
     }
 
-    public String createDir(String dirname, User user) {
+    public String createDir(String dirname, User user, FilePermission filePermissions) {
         String output;
 
         int currentDirectoryInodeNumber = user.getCurrentDirectoryInodeNumber();
@@ -233,7 +233,7 @@ public class FSService {
                     .type(FileType.DIRECTORY) //
                     .owner(user) //
                     .creationDate(new Date()) //
-                    .permissions(FilePermission.OTHERS_CAN_READ) //
+                    .permissions(filePermissions) //
                     .tableOfContents(tableOfContents).build();
 
             inodeList.registerInode(newDirectoryInode, freeInodeNumber);
@@ -311,7 +311,7 @@ public class FSService {
         return diskHelper.blockContentToString(fileBlock, fileInode.getSize());
     }
 
-    public String createFile(String filename, String content, User user) {
+    public String createFile(String filename, String content, User user, FilePermission filePermissions) {
         String output;
 
         int currentDirectoryInodeNumber = user.getCurrentDirectoryInodeNumber();
@@ -346,7 +346,7 @@ public class FSService {
                     .type(FileType.REGULAR_FILE) //
                     .owner(user) //
                     .creationDate(new Date()) //
-                    .permissions(FilePermission.OTHERS_CAN_READ) //
+                    .permissions(filePermissions) //
                     .tableOfContents(tableOfContents).build();
 
             inodeList.registerInode(newFileInode, freeInodeNumber);
