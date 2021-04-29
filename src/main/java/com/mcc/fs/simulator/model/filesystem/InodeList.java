@@ -1,6 +1,5 @@
 package com.mcc.fs.simulator.model.filesystem;
 
-import com.mcc.fs.simulator.config.Constants;
 import com.mcc.fs.simulator.model.users.User;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
@@ -25,7 +24,7 @@ public class InodeList {
         inodes = new Inode[64];
         log.info("Inode list size: {}", inodes.length);
         for (int i = 0; i < inodes.length; i++) {
-            inodes[i] = Inode.builder().size(0).type(FileType.FREE_INODE).owner(defaultOwner).creationDate(new Date()).permissions(Constants.DEFAULT_PERMISSIONS).tableOfContents(new int[11]).build();
+            inodes[i] = Inode.builder().size(0).type(FileType.FREE_INODE).owner(defaultOwner).creationDate(new Date()).permissions(FilePermission.RESTRICTED_TO_OWNER).tableOfContents(new int[11]).build();
         }
     }
 

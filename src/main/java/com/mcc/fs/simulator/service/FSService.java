@@ -62,7 +62,7 @@ public class FSService {
                 .type(FileType.DIRECTORY) //
                 .owner(rootUser) //
                 .creationDate(new Date()) //
-                .permissions(Constants.DEFAULT_PERMISSIONS) //
+                .permissions(FilePermission.OTHERS_CAN_READ_WRITE) //
                 .tableOfContents(tableOfContents).build();
 
         inodeList.registerInode(rootDirectoryInode, Constants.ROOT_DIRECTORY_INODE);
@@ -173,14 +173,20 @@ public class FSService {
         for (DirectoryEntry entry : directoryBlockToList.getEntries()) {
             Inode entryInode = inodeList.getInodeByPosition(entry.getInode());
 
-            output //
-                    .append(entryInode.getType().toString()).append(" ") //
-                    .append(entryInode.getPermissions().toString()).append(" ") //
-                    .append(entry.getInode()).append(" ") //
-                    .append(entryInode.getOwner().getUsername()).append(" ") //
-                    .append(entryInode.getSize()).append(" ") //
-                    .append(entryInode.getCreationDate()).append(" ") //
-                    .append(entry.getName()).append("<br/>");
+            boolean isOwner = entryInode.getOwner().getId() == user.getId();
+            boolean othersCanReadPermissions = !entryInode.getPermissions().equals(FilePermission.RESTRICTED_TO_OWNER);
+
+            if (isOwner || othersCanReadPermissions) {
+                output //
+                        .append(entryInode.getType().toString()).append(" ") //
+                        .append(entryInode.getPermissions().toString()).append(" ") //
+                        .append(entry.getInode()).append(" ") //
+                        .append(entryInode.getOwner().getUsername()).append(" ") //
+                        .append(entryInode.getSize()).append(" ") //
+                        .append(entryInode.getCreationDate()).append(" ") //
+                        .append(entry.getName()).append("<br/>");
+            }
+
         }
 
         return output.toString();
@@ -227,7 +233,7 @@ public class FSService {
                     .type(FileType.DIRECTORY) //
                     .owner(user) //
                     .creationDate(new Date()) //
-                    .permissions(Constants.DEFAULT_PERMISSIONS) //
+                    .permissions(FilePermission.OTHERS_CAN_READ) //
                     .tableOfContents(tableOfContents).build();
 
             inodeList.registerInode(newDirectoryInode, freeInodeNumber);
@@ -340,7 +346,7 @@ public class FSService {
                     .type(FileType.REGULAR_FILE) //
                     .owner(user) //
                     .creationDate(new Date()) //
-                    .permissions(Constants.DEFAULT_PERMISSIONS) //
+                    .permissions(FilePermission.OTHERS_CAN_READ) //
                     .tableOfContents(tableOfContents).build();
 
             inodeList.registerInode(newFileInode, freeInodeNumber);
@@ -406,6 +412,20 @@ public class FSService {
 
         Inode fileInodeToRemove = inodeList.getInodeByPosition(fileEntry.getInode());
 
+        if (fileInodeToRemove.getType().equals(FileType.DIRECTORY)) {
+            DirectoryBlock directoryBlock = readDirectoryBlockByInodeNumber(fileEntry.getInode());
+            if (directoryBlock.getEntries().size() > 2) {
+                return "the directory is not empty";
+            }
+        }
+
+        boolean isOwner = fileInodeToRemove.getOwner().getId() == user.getId();
+        boolean othersCanWrite = fileInodeToRemove.getPermissions().equals(FilePermission.OTHERS_CAN_READ_WRITE);
+
+        if (!isOwner && !othersCanWrite) {
+            return "insufficient permissions";
+        }
+
         int blockNumberToRemove = fileInodeToRemove.getTableOfContents()[0];
         int inodeNumberToRemove = fileEntry.getInode();
 
@@ -413,7 +433,7 @@ public class FSService {
         fileInodeToRemove.setType(FileType.FREE_INODE);
         fileInodeToRemove.setOwner(usersService.getUserByUsername(Constants.DEFAULT_OWNER));
         fileInodeToRemove.setCreationDate(new Date());
-        fileInodeToRemove.setPermissions(Constants.DEFAULT_PERMISSIONS);
+        fileInodeToRemove.setPermissions(FilePermission.OTHERS_CAN_READ);
         fileInodeToRemove.setTableOfContents(new int[11]);
 
         inodeList.registerInode(fileInodeToRemove, inodeNumberToRemove);
@@ -453,7 +473,7 @@ public class FSService {
             diskFile.seek(offset);
             diskFile.write(srcBlock.getContent());
 
-            output = "File " + filename + " removed";
+            output = filename + " removed";
         } catch (IOException e) {
             log.error("Unable to create disk file. Cause: {}", e.getMessage(), e);
             output = "Unable to create directory";
