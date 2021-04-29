@@ -41,6 +41,7 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 | copydir      | Copies a directory in directory   | copydir [dir name] [directory]  |
 | listdir      | Displays directory's content      | listdir                         |
 | showf        | Displays file's content           | showf [file_name]               |
+| gotodir      | Move to the directory indicated   | gotodir [dir_name]              |
 
 
 
