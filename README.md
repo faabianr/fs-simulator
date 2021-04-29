@@ -36,12 +36,10 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 ## Available Commands
 | Command      | Description                       | Usage
 | -----------  | -----------                       | -----------                     |
-| createdir    | Creates a new directory           | createdir [directory name]      |
-| createf      | Creates a new file                | createf [file name]             |
-| removef      | Removes a file                    | removef [file name]             |
-| removedir    | Removes a directory               | removedir [directoy name]       |
-| copyf        | Copies a file in directory        | copyf [file name] [directory]   |
-| copydir      | Copies a directory in directory   | copydir [dir name] [directory]  |
+| createdir    | Creates a new directory           | createdir [--private] [directory name]      |
+| createf      | Creates a new file                | createf [--private] [file name]             |
+| removef      | Removes a file or a directory (must be empty)                 | removef [file name]             |
+| copyf        | Copies a file or direcotory into a target directory        | copyf [file name] [directory]   |
 | listdir      | Displays directory's content      | listdir                         |
 | showf        | Displays file's content           | showf [file_name]               |
 | gotodir      | Move to the directory indicated   | gotodir [dir_name]              |
