@@ -40,7 +40,7 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 | copyf        | Copies a file in directory        | copyf [file name] [directory]   |
 | copydir      | Copies a directory in directory   | copydir [dir name] [directory]  |
 | listdir      | Displays directory's content      | listdir                         |
-| showf        | Displays file's content           | showf [file_name]                         |
+| showf        | Displays file's content           | showf [file_name]               |
 
 
 
@@ -58,8 +58,9 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 ## Copyf or copydir command
 ![alt_text](https://www.websequencediagrams.com/files/render?link=MpoNFVOFdc3lQx9VA1EDy5EmyegoarR7N5oji2PpgujA4Y3cHDPlAQoajH6VhqE8)
 ## Showf command
-![alt_text](https://www.websequencediagrams.com/files/render?link=GJbYXJQ1fBJgdgSs4rROz1o7hIYNNm9CifkdUIFaXgb1ms5XIQe5PVjS8Aqv5EAM)
-
+![alt_text](https://www.websequencediagrams.com/files/render?link=lM7IuFOQKPPie3LsWoqS9Dqi9rU8q8DgzqJnh0OM03X3l3wGVgHyl50zLXAMSZ8g)
+## Gotodir command
+![alt_text]()
 ## Contributors
 * Mariam Castañeda
 * Fabián Rivera
