@@ -455,6 +455,14 @@ public class FSService {
             diskFile.write(currentDirectoryBlock.getContent());
             log.info("current directory content written");
 
+            // writing target directory
+            log.info("writing target directory into disk file with fd={}", diskFile.getFD().toString());
+            offset = (long) targetDirectoryInode.getTableOfContents()[0] * Block.BYTES;
+            log.info("target directory block={}, offset={}", targetDirectoryBlock, offset);
+            diskFile.seek(offset);
+            diskFile.write(targetDirectoryBlock.getContent());
+            log.info("target directory content written");
+
             // writing new file
             Inode newFileInode = inodeList.getInodeByPosition(fileEntry.getInode());
             Block srcBlock = readContentBlockByInodeNumber(fileEntry.getInode()); // this is the content block to be copied
