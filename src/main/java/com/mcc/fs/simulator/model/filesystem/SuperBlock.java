@@ -58,7 +58,7 @@ public class SuperBlock {
     }
 
     public void registerFreeBlock(byte block) {
-        log.info("added free block={} to LIL", block);
+        log.info("added free block={} to LBL", block);
         LBLqueue.add(block);
     }
 
