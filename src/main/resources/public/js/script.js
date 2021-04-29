@@ -25,7 +25,6 @@ $( document ).ready( function() {
                    Accept: 'application/json',
                    cache : false,
                    success: function(resultData) {
-                   console.log(resultData);
                     rootUserId = resultData.id;
                     window.location.href = "/v1/fs-simulator/terminal.html?user="+givenUsername+"&id="+rootUserId;
                    }
@@ -44,24 +43,25 @@ $( document ).ready( function() {
       // End Username Section
 
       // Init first command line
-         $("#cmdline0").keypress(function (ev) {
-           var keycode = (ev.keyCode ? ev.keyCode : ev.which);
-                if (keycode == '13') {
-                  prompt_id++;
-                  cmdline++;
-                  executeCommand($("#cmdline0").val());
-                  // When the user press enter it creates a new line in prompt
-                  setTimeout(
-                    function()
-                    {
-                       writeNewLine();
-                    }, 500);
-                }
-           });
+     $("#cmdline0").keypress(function (ev) {
+       var keycode = (ev.keyCode ? ev.keyCode : ev.which);
+            if (keycode == '13') {
+              prompt_id++;
+              cmdline++;
+              executeCommand($("#cmdline0").val());
+              // When the user press enter it creates a new line in prompt
+              setTimeout(
+                function()
+                {
+                   writeNewLine();
+                }, 500);
+            }
+       });
 
 
     //Execute every time the user press enter
     function writeNewLine(){
+
         // Create a clone of the terminal prompt line and put a new id
         $("#terminal_prompt").clone().appendTo("#terminal_body").each(function(){
            $(this).attr("class", "prompt"+(prompt_id));
@@ -70,7 +70,6 @@ $( document ).ready( function() {
            responseCmd++;
            responseLine.attr("id", "responseLine" + responseCmd);
            responseLine.text("");
-
 
            var newcmdLine = $(this).find("input");
            newcmdLine.attr("id", "cmdline" + cmdline);
@@ -82,20 +81,21 @@ $( document ).ready( function() {
                  var commandValue =  newcmdLine.val();
                     prompt_id++;
                     cmdline++;
-                    executeCommand(commandValue);
+                    var isClearCommand = commandValue != "clear" ? executeCommand(commandValue): clearCmd();
                     setTimeout(
                         function()
                         {
+                        if(!isClearCommand){
                            writeNewLine();
+                       }
                         }, 500);
                  }
            });
       });
-    }
+    };
 
       function executeCommand(command){
           var commandResponse = "";
-          console.log("userID" +  rootUserId);
           var executionRequest = {
                "input": command,
                "userId": rootUserId
@@ -120,7 +120,24 @@ $( document ).ready( function() {
                    $(pID).text(commandResponse);
                  }
           });
+        return false;
+      }
 
+      function clearCmd(){
+            $("#terminal_prompt[class*=prompt]").each(function(){
+            var lastTerminal = "prompt0";
+            var actualprompt = $(this).attr('class');
+             if(actualprompt != lastTerminal){
+                  $(this).remove();
+            }
+            $("#cmdline0").val("");
+            $("#cmdline0").focus();
+            $("#responseLine0").text("");
+            prompt_id = 0;
+            cmdline = 0;
+            responseCmd = 0;
+          });
+          return true;
       }
   }
 
