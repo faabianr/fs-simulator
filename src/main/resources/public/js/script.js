@@ -4,21 +4,44 @@ $( document ).ready( function() {
     var cmdline = 0;
     var responseCmd = 0;
     var rootUserId = 0;
+    var username = "";
 
     function init() {
-       var executionRequest = { "username": "root" };
-       $.ajax({
-           url: 'users/login',
-           dataType: 'json',
-           data: JSON.stringify(executionRequest),
-           type : 'POST',
-           contentType: 'application/json',
-           Accept: 'application/json',
-           cache : false,
-           success: function(resultData) {
-            rootUserId = resultData.id;
-           }
-     });
+    // Init Username Section
+       $( "#btn-login" ).click(function() {
+        var givenUsername = $("#username").val();
+        if (givenUsername == ''){
+            toastr.error('Please enter your username');
+            return false;
+        }
+
+        var executionRequest = { "username": givenUsername };
+               $.ajax({
+                   url: 'users/login',
+                   dataType: 'json',
+                   data: JSON.stringify(executionRequest),
+                   type : 'POST',
+                   contentType: 'application/json',
+                   Accept: 'application/json',
+                   cache : false,
+                   success: function(resultData) {
+                   console.log(resultData);
+                    rootUserId = resultData.id;
+                    window.location.href = "/v1/fs-simulator/terminal.html?user="+givenUsername+"&id="+rootUserId;
+                   }
+             });
+       });
+
+         var url = new URLSearchParams(window.location.search);
+         username = url.get('user');
+         rootUserId = url.get('id');
+
+         if(username != ''){
+           $("#welcomerMsg").text("Welcome "+ username);
+           $("#bar_user").text(username+"@[noname]");
+           $("#terminal_prompt-user").text(username+"@noname:");
+         }
+      // End Username Section
 
       // Init first command line
          $("#cmdline0").keypress(function (ev) {
@@ -35,7 +58,7 @@ $( document ).ready( function() {
                     }, 500);
                 }
            });
-    }
+
 
     //Execute every time the user press enter
     function writeNewLine(){
@@ -47,6 +70,7 @@ $( document ).ready( function() {
            responseCmd++;
            responseLine.attr("id", "responseLine" + responseCmd);
            responseLine.text("");
+
 
            var newcmdLine = $(this).find("input");
            newcmdLine.attr("id", "cmdline" + cmdline);
@@ -71,6 +95,7 @@ $( document ).ready( function() {
 
       function executeCommand(command){
           var commandResponse = "";
+          console.log("userID" +  rootUserId);
           var executionRequest = {
                "input": command,
                "userId": rootUserId
@@ -97,5 +122,7 @@ $( document ).ready( function() {
           });
 
       }
+  }
+
   init();
 });
