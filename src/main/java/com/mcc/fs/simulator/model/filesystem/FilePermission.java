@@ -31,7 +31,7 @@ public enum FilePermission {
 
     @Override
     public String toString() {
-        return this.name() + " - " + value;
+        return this.name();
     }
 
 }

@@ -66,6 +66,23 @@ public class FSService {
         inodeList.registerInode(rootDirectoryInode, Constants.ROOT_DIRECTORY_INODE);
     }
 
+    public String generateDirectoryEntryLine(DirectoryEntry directoryEntry) {
+        StringBuilder directoryEntryLineSb = new StringBuilder();
+
+        Inode entryInode = inodeList.getInodeByPosition(directoryEntry.getInode());
+
+        directoryEntryLineSb //
+                .append(entryInode.getType().toString()).append(" ") //
+                .append(entryInode.getPermissions().toString()).append(" ") //
+                .append(directoryEntry.getInode()).append(" ") //
+                .append(entryInode.getOwner().getUsername()).append(" ") //
+                .append(entryInode.getSize()).append(" ") //
+                .append(entryInode.getCreationDate()).append(" ") //
+                .append(directoryEntry.getName()).append("<br/>");
+
+        return directoryEntryLineSb.toString();
+    }
+
     public String listdir(String directoryName, User user) {
         int currentDirectoryInodeNumber = user.getCurrentDirectoryInodeNumber();
 
@@ -81,7 +98,17 @@ public class FSService {
             DirectoryBlock currentDirectoryBlock = diskHelper.byteArrayToDirectoryBlock(
                     directoryBlockBytes, currentDirectoryInode.getSize());
             for (DirectoryEntry entry : currentDirectoryBlock.getEntries()) {
-                output.append(entry.getName()).append("<br/>");
+
+                Inode entryInode = inodeList.getInodeByPosition(entry.getInode());
+
+                output //
+                        .append(entryInode.getType().toString()).append(" ") //
+                        .append(entryInode.getPermissions().toString()).append(" ") //
+                        .append(entry.getInode()).append(" ") //
+                        .append(entryInode.getOwner().getUsername()).append(" ") //
+                        .append(entryInode.getSize()).append(" ") //
+                        .append(entryInode.getCreationDate()).append(" ") //
+                        .append(entry.getName()).append("<br/>");
             }
         } catch (IOException e) {
             log.error(e.getMessage(), e);
@@ -103,8 +130,8 @@ public class FSService {
         tableOfContents[0] = freeBlockNumber; // Root directoy starts in 8 and 9 is the first free block
         User rootUser = usersService.getUserByUsername(Constants.DEFAULT_OWNER);
 
-        DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) currentDirectoryInodeNumber).name("..").build();
         DirectoryEntry newCurrentDirectoryEntry = DirectoryEntry.builder().inode(freeInodeNumber).name(".").build();
+        DirectoryEntry parentDirectoryEntry = DirectoryEntry.builder().inode((short) currentDirectoryInodeNumber).name("..").build();
 
         Inode currentDirectoryInode = inodeList.getInodeByPosition(currentDirectoryInodeNumber);
         int contentBlock = currentDirectoryInode.getTableOfContents()[0]; // Bloque de contenido del padre
@@ -121,8 +148,8 @@ public class FSService {
             DirectoryEntry newDirectoryEntry = DirectoryEntry.builder().inode(freeInodeNumber).name(dirname).build();
             currentDirectoryBlock.addEntry(newDirectoryEntry); // Se agrega dir al current
 
-            newDirectoryBlock.addEntry(parentDirectoryEntry);
             newDirectoryBlock.addEntry(newCurrentDirectoryEntry);
+            newDirectoryBlock.addEntry(parentDirectoryEntry);
 
             newDirectoryBlock.setContent(diskHelper.directoryBlockToByteArray(newDirectoryBlock));
             currentDirectoryBlock.setContent(diskHelper.directoryBlockToByteArray(currentDirectoryBlock));
