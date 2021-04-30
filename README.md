@@ -21,7 +21,7 @@ Swagger UI is included with this project so the Rest API can be easily explored.
 * Given above's point: 1 directory will contain 64 entries
 
 
-![alt text](https://github.com/faabianr/fs-simulator/blob/main/src/main/resources/arquitectura_imagen.png)
+![alt text](https://github.com/faabianr/fs-simulator/blob/main/src/main/resources/arquitectura.png)
 
 ### Main Objects
 
